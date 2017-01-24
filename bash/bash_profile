@@ -1,0 +1,124 @@
+# set where virutal environments will live
+export WORKON_HOME=$HOME/code
+
+# ensure all new environments are isolated from the site-packages directory
+export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
+# use the same directory for virtualenvs as virtualenvwrapper
+export PIP_VIRTUALENV_BASE=$WORKON_HOME
+# makes pip detect an active virtualenv and install to it
+export PIP_RESPECT_VIRTUALENV=true
+if [[ -r /usr/local/bin/virtualenvwrapper.sh ]]; then
+    source /usr/local/bin/virtualenvwrapper.sh
+else
+    echo "WARNING: Can't find virtualenvwrapper.sh"
+fi
+
+BASHCHONFIG_TC_RESET=$'\x1B[0m'
+BASHCHONFIG_TC_BG_FAIL=$'\x1B[48;5;1m'
+BASHCHONFIG_TC_BG_SUCC=$'\x1B[48;5;243m'
+BASHCHONFIG_TC_TEXT=$'\x1B[38;5;15m'
+BASHCHONFIG_CLREOL=$'\x1B[K'
+BASHCHONFIG_INIT=0
+BASHCHONFIG_TIMEISSET=0
+
+function after_command() {
+  if [ "$BASHCHONFIG_TIMEISSET" -ne "1" ] ;then
+    BASHCHONFIG_TIME=$(gdate +%s%3N)
+    BASHCHONFIG_TIMEISSET=1
+  fi
+}
+
+calc() { awk "BEGIN{print $*}"; }
+
+trap 'after_command' DEBUG
+
+function prompt_command() {
+
+  BASHCHONFIG_VAR=$?
+  BASHCHONFIG_HIST="$(history 1 | cut -c 8-)"
+  BASHCHONFIG_CMD="$(echo $BASHCHONFIG_HIST | cut -d ' ' -f 1)"
+  BASHCHONFIG_PWD=$(pwd)
+  BASHCHONFIG_TITLE=""
+  BASHCHONFIG_TIMEPASSED="$(calc $(($(gdate +%s%3N)-BASHCHONFIG_TIME))/1000)"
+
+  BASHCHONFIG_TIME="$(gdate +%s%3N)"
+  BASHCHONFIG_TIMEISSET=0
+
+  if [ -e "$VIRTUAL_ENV" ]; then
+    BASHCHONFIG_TITLE="${VIRTUAL_ENV#$WORKON_HOME/} - "
+  fi
+
+  if [[ "$(pwd)" == $HOME* ]] ;then
+    BASHCHONFIG_TITLE="$BASHCHONFIG_TITLE~${BASHCHONFIG_PWD#$HOME}"
+  fi
+
+  if [ "$BASHCHONFIG_INIT" -ne "0" ] ;then
+    echo -n "${BASHCHONFIG_TC_TEXT}"
+    if [ "$BASHCHONFIG_VAR" -eq "0" ] ;then
+      echo -n "${BASHCHONFIG_TC_BG_SUCC} [$BASHCHONFIG_HIST] - ${BASHCHONFIG_TIMEPASSED}s - Success! - ✓"
+      BASHCHONFIG_TITLE="$BASHCHONFIG_TITLE - $BASHCHONFIG_CMD"
+    else
+      echo -n "${BASHCHONFIG_TC_BG_FAIL} [$BASHCHONFIG_HIST] - ${BASHCHONFIG_TIMEPASSED}s - Failed! - x"
+      BASHCHONFIG_TITLE="$BASHCHONFIG_TITLE - Failed"
+    fi
+    echo "${BASHCHONFIG_CLREOL}${BASHCHONFIG_TC_RESET}"
+  fi
+
+
+  echo -n -e "\033]0;$BASHCHONFIG_TITLE\007"
+
+  BASHCHONFIG_INIT=1
+}
+export PROMPT_COMMAND=prompt_command
+
+
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export PS1="[\u@\h \W]$ "
+export PATH=/usr/local/sbin:$PATH
+export NODE_PATH=/usr/local/lib/node_modules
+export HISTCONTROL=ignoreboth:erasedups
+
+export THEFUCK_RULES='sudo:no_command'
+export THEFUCK_REQUIRE_CONFIRMATION='false'
+export THEFUCK_WAIT_COMMAND=10
+export THEFUCK_NO_COLORS='true'
+export THEFUCK_PRIORITY='no_command=9999:apt_get=100'
+export THEFUCK_HISTORY_LIMIT='2000'
+
+eval "$(thefuck --alias)"
+
+# === other ===
+
+function a() {
+  if [ -z "$VIRTUAL_ENV" ]; then
+      echo "no active VIRTUAL ENV"
+      return 1
+  fi
+
+  if [ ! -d "$VIRTUAL_ENV/src" ]; then
+      mkdir "$VIRTUAL_ENV/src"
+  fi
+  cd "$VIRTUAL_ENV/src"
+}
+
+function undo() {
+	git reset --hard HEAD~1
+}
+
+function zip() {
+  if [ $# -eq 0 ]; then
+    NAME=$(basename $(pwd))
+    /usr/bin/zip -r $NAME . -x "*.DS_Store" &>/dev/null
+    echo "Created $NAME.zip ($(calc $(echo $(wc -c < $NAME.zip) | xargs)/1000000) Mb)"
+  elif [ $# -eq 1 ]; then
+    NAME=$1
+    /usr/bin/zip -r $1 . -x "*.DS_Store" &>/dev/null
+    echo "Created $NAME.zip ($(calc $(echo $(wc -c < $NAME.zip) | xargs)/1000000) Mb)"
+  else
+    /usr/bin/zip $@
+  fi
+}
+
+alias o=open
+alias g++=g++-6
