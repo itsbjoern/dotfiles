@@ -13,6 +13,12 @@ else
     echo "WARNING: Can't find virtualenvwrapper.sh"
 fi
 
+
+alias o=open
+alias g++=g++-6
+alias myip="ifconfig | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p'"
+
+
 BASHCHONFIG_TC_RESET=$'\x1B[0m'
 BASHCHONFIG_TC_BG_FAIL=$'\x1B[48;5;1m'
 BASHCHONFIG_TC_BG_SUCC=$'\x1B[48;5;243m'
@@ -79,15 +85,6 @@ export PATH=/usr/local/sbin:$PATH
 export NODE_PATH=/usr/local/lib/node_modules
 export HISTCONTROL=ignoreboth:erasedups
 
-export THEFUCK_RULES='sudo:no_command'
-export THEFUCK_REQUIRE_CONFIRMATION='false'
-export THEFUCK_WAIT_COMMAND=10
-export THEFUCK_NO_COLORS='true'
-export THEFUCK_PRIORITY='no_command=9999:apt_get=100'
-export THEFUCK_HISTORY_LIMIT='2000'
-
-eval "$(thefuck --alias)"
-
 # === other ===
 
 function a() {
@@ -119,6 +116,3 @@ function zip() {
     /usr/bin/zip $@
   fi
 }
-
-alias o=open
-alias g++=g++-6
