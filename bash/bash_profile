@@ -41,7 +41,7 @@ function a() {
 }
 
 function undo() {
-	git reset --hard HEAD~1
+	git reset --mixed HEAD~1
 }
 
 function zip() {
