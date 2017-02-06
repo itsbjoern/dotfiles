@@ -3,6 +3,10 @@
     enabled: true
   core:
     telemetryConsent: "no"
+    themes: [
+      "native-ui"
+      "one-dark-syntax"
+    ]
   editor:
     fontSize: 12
     showIndentGuide: true
@@ -11,7 +15,6 @@
     userId: "cea18282-adf6-7fef-8b3f-c2868b8cb07e"
   minimap:
     absoluteMode: true
-    adjustAbsoluteModeHeight: true
   "tree-view":
     alwaysOpenExisting: true
   welcome:
