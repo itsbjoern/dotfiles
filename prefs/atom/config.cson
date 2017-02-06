@@ -1,0 +1,18 @@
+"*":
+  autosave:
+    enabled: true
+  core:
+    telemetryConsent: "no"
+  editor:
+    fontSize: 12
+    showIndentGuide: true
+    showInvisibles: true
+  "exception-reporting":
+    userId: "cea18282-adf6-7fef-8b3f-c2868b8cb07e"
+  minimap:
+    absoluteMode: true
+    adjustAbsoluteModeHeight: true
+  "tree-view":
+    alwaysOpenExisting: true
+  welcome:
+    showOnStartup: false
