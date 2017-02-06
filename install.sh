@@ -12,3 +12,5 @@ ln -s "$PWD/bash/bash_profile" ~/.bash_profile
 
 rm -rf ~/.atom
 ln -s "$PWD/prefs/atom" ~/.atom
+
+ssh-add -K ~/.ssh/id_rsa
