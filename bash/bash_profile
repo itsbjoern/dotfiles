@@ -49,6 +49,10 @@ function docker-cleanup() {
   docker images --no-trunc -aqf "dangling=true" | xargs docker rmi
 }
 
+function git-overview() {
+  git log --graph --decorate --oneline
+}
+
 function zip() {
   if [ $# -eq 0 ]; then
     NAME=$(basename $(pwd))
