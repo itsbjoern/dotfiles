@@ -56,6 +56,10 @@ function git-overview() {
   git log --graph --decorate --oneline
 }
 
+function fix-spotify() {
+  sudo find Spotify.app -exec chmod 755 {} \;
+}
+
 function zip() {
   if [ $# -eq 0 ]; then
     NAME=$(basename $(pwd))
