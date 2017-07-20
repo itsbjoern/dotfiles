@@ -60,6 +60,10 @@ function fix-spotify() {
   sudo find Spotify.app -exec chmod 755 {} \;
 }
 
+function force-logout {
+  sudo pkill loginwindow
+}
+
 function zip() {
   if [ $# -eq 0 ]; then
     NAME=$(basename $(pwd))
