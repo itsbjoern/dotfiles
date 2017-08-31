@@ -10,4 +10,4 @@ echo Symlinking dotfiles...
 rm -rf ~/.bash_profile
 ln -s "$PWD/bash/bash_profile" ~/.bash_profile
 
-ssh-add -K ~/.ssh/id_rsa
+curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash

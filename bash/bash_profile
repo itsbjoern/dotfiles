@@ -13,6 +13,9 @@ else
     echo "WARNING: Can't find virtualenvwrapper.sh"
 fi
 
+if [ -f ~/.git-completion.bash ]; then
+  . ~/.git-completion.bash
+fi
 
 alias o=open
 alias g++=g++-6
@@ -58,10 +61,6 @@ function git-overview() {
 
 function fix-spotify() {
   sudo find Spotify.app -exec chmod 755 {} \;
-}
-
-function force-logout {
-  sudo pkill loginwindow
 }
 
 function zip() {
