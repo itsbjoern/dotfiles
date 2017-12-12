@@ -20,6 +20,7 @@ if [ -f ~/.git-completion.bash ]; then
 fi
 
 alias o=open
+alias pcalc='python -i -c "from __future__ import division"'
 
 source $(dirname $(readlink ~/.bash_profile))/bash-me/profile
 
