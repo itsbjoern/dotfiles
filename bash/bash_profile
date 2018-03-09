@@ -21,13 +21,15 @@ fi
 
 alias o=open
 alias pcalc='python -i -c "from __future__ import division"'
+alias blender=/Applications/Blender/blender.app/Contents/MacOS/blender
 
 source $(dirname $(readlink ~/.bash_profile))/bash-me/profile
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export PS1="[\u@\h \W]$ "
-export PATH="$PATH:/usr/local/sbin"
+export PATH="$PATH:/usr/local/sbin:/usr/local/bin"
+export PATH="/usr/local/opt/python@2/libexec/bin:$PATH"
 
 export ANDROID_HOME=$HOME/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/tools
@@ -39,6 +41,14 @@ export NODE_PATH=/usr/local/lib/node_modules
 export HISTCONTROL=ignoreboth:erasedups
 export HISTFILESIZE=10000000
 export HISTSIZE=10000000
+
+ulimit -n 65536 65536
+
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+. $(brew --prefix)/etc/bash_completion
+fi
+
+eval $(thefuck --alias)
 
 # === other ===
 
@@ -83,4 +93,11 @@ function zip() {
   else
     /usr/bin/zip $@
   fi
+}
+
+function update_terminal_cwd() {
+    local SEARCH=' ';
+    local REPLACE='%20';
+    local PWD_URL="file://$HOSTNAME${PWD//$SEARCH/$REPLACE}";
+    printf '\e]7;%s\a' "$PWD_URL"
 }
