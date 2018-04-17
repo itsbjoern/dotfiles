@@ -1,5 +1,6 @@
 [user]
   name = "Björn Friedrichs"
+  email = b.friedrichs@greyrook.com
 
 [push]
   default = upstream
@@ -9,4 +10,4 @@
   remove-file = "!f() { git filter-branch -f --index-filter \"git rm --cached --ignore-unmatch $1\" --prune-empty --tag-name-filter cat -- --all; }; f"
 
 [core]
-	excludesfile = ~/.gitignore-global
+  excludesfile = ~/.gitignore-global

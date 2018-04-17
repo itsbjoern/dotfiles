@@ -20,6 +20,7 @@ if [ -f ~/.git-completion.bash ]; then
 fi
 
 alias o=open
+alias mongo='docker exec -ti mongodb mongo'
 alias pcalc='python -i -c "from __future__ import division"'
 alias blender=/Applications/Blender/blender.app/Contents/MacOS/blender
 
