@@ -4,7 +4,7 @@ _git_super_status() {
     if [ -n "$__CURRENT_GIT_STATUS" ]; then
       STATUS="$ZSH_THEME_GIT_PROMPT_PREFIX$ZSH_THEME_GIT_PROMPT_BRANCH$GIT_BRANCH%{${reset_color}%}"
 
-      if [ "$GIT_CHANGED" -eq "0" ] && [ "$GIT_CONFLICTS" -eq "0" ] && [ "$GIT_STAGED" -eq "0" ] && [ "$GIT_UNTRACKED" -eq "0" ]; then
+      if [ "$GIT_AHEAD" -eq "0" ] && [ "$GIT_BEHIND" -eq "0" ] && [ "$GIT_CHANGED" -eq "0" ] && [ "$GIT_CONFLICTS" -eq "0" ] && [ "$GIT_STAGED" -eq "0" ] && [ "$GIT_UNTRACKED" -eq "0" ]; then
           STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_CLEAN"
       else
           STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_SEPARATOR"
