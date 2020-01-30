@@ -12,6 +12,7 @@ ZSH_THEME="mine"
 
 plugins=(
   git 
+  git-prompt 
   cp 
   brew 
   osx 
