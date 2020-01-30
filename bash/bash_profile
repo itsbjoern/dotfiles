@@ -5,7 +5,7 @@ export WORKON_HOME=$HOME/code
 export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 # use the same directory for virtualenvs as virtualenvwrapper
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.6
+export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.7
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
 # makes pip detect an active virtualenv and install to it
 export PIP_RESPECT_VIRTUALENV=true
@@ -20,6 +20,7 @@ if [ -f ~/.git-completion.bash ]; then
 fi
 
 alias o=open
+alias c=clear && printf '\e[3J'
 alias mongo='docker exec -ti mongodb mongo'
 alias pcalc='python -i -c "from __future__ import division"'
 alias blender=/Applications/Blender/blender.app/Contents/MacOS/blender
@@ -46,8 +47,6 @@ export HISTFILESIZE=10000000
 export HISTSIZE=10000000
 
 export UID
-
-ulimit -n 65536 65536
 
 if [ -f $(brew --prefix)/etc/bash_completion ]; then
 . $(brew --prefix)/etc/bash_completion
