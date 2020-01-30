@@ -89,6 +89,8 @@ function getpass() {
         return 0
     fi
 
+    RESULT=`lpass show --color=never $ID_RESULT`
+
     PASS_URL_GREP=`echo "$RESULT" | grep id:`
     PASS_URL="$(cut -d' ' -f1 <<<$PASS_URL_GREP)"
 
@@ -98,7 +100,7 @@ function getpass() {
     PASS_ID="$(cut -d' ' -f3 <<<$PASS_URL_GREP)"
     `lpass show -c --password ${PASS_ID: : -1}`
 
-    echo "Found match for \"$PASS_URL\" with username \"$PASS_NAME\""
+    echo "Found match for \"$PASS_URL\" with username \"$PASS_NAME\"."
     echo "Copied password to clipboard!\n"
 
     return 0
