@@ -62,6 +62,48 @@ alias pcalc='python -i -c "from __future__ import division"'
 alias python="/usr/bin/python3"
 alias python2="/usr/bin/python2"
 
+function getpass() {
+    SEARCH="$@";
+
+    echo -e "\nTrying to find entry with string: $SEARCH"
+    ID_RESULT=`lpass show -Gx --id --color=never $SEARCH`
+    retVal=$?
+
+    if [ $retVal -ne 0 ]; then
+        echo ""
+        return 1
+    fi
+
+    if [ ! $(wc -l <<< "$ID_RESULT") = 1 ]; then
+        echo "Found multiple entries:"
+        while IFS= read -r line; do
+            RESULT=`lpass show --color=never $line`
+            PASS_ID="$(cut -d' ' -f3 <<<$PASS_URL_GREP)"
+            PASS_URL_GREP=`echo "$RESULT" | grep id:`
+            PASS_URL="$(cut -d' ' -f1 <<<$PASS_URL_GREP)"
+            PASS_NAME_GREP=`echo "$RESULT" | grep username`
+            PASS_NAME="$(cut -d' ' -f2 <<<$PASS_NAME_GREP)"
+            echo "  * [$PASS_URL] $PASS_NAME -> ${PASS_ID: : -1}"
+        done <<< "$ID_RESULT"
+        echo "Repeat command with desired ID.\n"
+        return 0
+    fi
+
+    PASS_URL_GREP=`echo "$RESULT" | grep id:`
+    PASS_URL="$(cut -d' ' -f1 <<<$PASS_URL_GREP)"
+
+    PASS_NAME_GREP=`echo "$RESULT" | grep username`
+    PASS_NAME="$(cut -d' ' -f2 <<<$PASS_NAME_GREP)"
+
+    PASS_ID="$(cut -d' ' -f3 <<<$PASS_URL_GREP)"
+    `lpass show -c --password ${PASS_ID: : -1}`
+
+    echo "Found match for \"$PASS_URL\" with username \"$PASS_NAME\""
+    echo "Copied password to clipboard!\n"
+
+    return 0
+}
+
 function a() {
   if [ -z "$VIRTUAL_ENV" ]; then
       echo "no active VIRTUAL ENV"
@@ -75,6 +117,7 @@ function a() {
 }
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+export PATH="/usr/local/opt/python/libexec/bin:/usr/local/sbin:$PATH"
 
 export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=10000000
