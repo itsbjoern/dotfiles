@@ -8,7 +8,7 @@ rm -rf ~/.gitignore-global
 rm -rf ~/.gitconfig
 rm -rf ~/.oh-my-zsh/themes/mine.zsh-theme
 
-ln -s "$PWD/zsh/zsh_profile" ~/.zshrc
+ln -s "$PWD/zsh/zsh_profile.zshrc" ~/.zshrc
 ln -s "$PWD/zsh/mine.zsh-theme" ~/.oh-my-zsh/themes/mine.zsh-theme
 ln -s "$PWD/extras/.gitconfig" ~/.gitconfig
 ln -s "$PWD/extras/.gitignore-global" ~/.gitignore-global
