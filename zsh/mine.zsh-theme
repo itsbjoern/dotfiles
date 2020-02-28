@@ -30,9 +30,20 @@ _git_super_status() {
     fi
 }
 
+_curr_path() {
+    if [ -z "$VIRTUAL_ENV" ]; then
+      echo "%~"
+    else
+      if [ "$VIRTUAL_ENV/src" = "$(pwd)" ]; then
+        echo "$(virtualenv_prompt_info)"
+      else
+        echo "$(virtualenv_prompt_info)/$(realpath --relative-to=$VIRTUAL_ENV/src $(pwd))"
+      fi
+    fi
+}
+
 PROMPT="%(?:%{$fg_bold[green]%}➜ %n:%{$fg_bold[red]%}➜ %n)"
-PROMPT+='$(virtualenv_prompt_info)'
-PROMPT+=' %{$fg[cyan]%}[%~]%{$reset_color%} $(_git_super_status)'
+PROMPT+=' %{$fg[cyan]%}[$(_curr_path)]%{$reset_color%} $(_git_super_status)'
 RPROMPT=""
 
 ZSH_THEME_VIRTUALENV_PREFIX="@"
