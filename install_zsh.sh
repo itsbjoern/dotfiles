@@ -1,6 +1,22 @@
+which -s brew
+if [[ $? != 0 ]] ; then
+    # Install Homebrew
+    echo "Homebrew not found... Installing"
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+fi
+
+which -s realpath
+if [[ $? != 0 ]] ; then
+    echo "Coreutils not found... Installing"
+    brew install coreutils
+fi
 
 if [  ! -d "/Users/$USER/.oh-my-zsh" ] ;then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+if [  ! -d "/Users/$USER/.oh-my-zsh/custom/plugins/git-open" ] ;then
+  sh -c "git clone https://github.com/paulirish/git-open.git /Users/$USER/.oh-my-zsh/custom/plugins/git-open"
 fi
 
 rm -rf ~/.zshrc
