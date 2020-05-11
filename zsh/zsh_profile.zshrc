@@ -114,7 +114,13 @@ function a() {
   if [ ! -d "$VIRTUAL_ENV/src" ]; then
       mkdir "$VIRTUAL_ENV/src"
   fi
-  cd "$VIRTUAL_ENV/src"
+
+  ENV_BASE=`basename $VIRTUAL_ENV`
+  if [ -d "$VIRTUAL_ENV/src/$ENV_BASE" ]; then
+    cd "$VIRTUAL_ENV/src/$ENV_BASE"
+  else
+    cd "$VIRTUAL_ENV/src"
+  fi
 }
 
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"

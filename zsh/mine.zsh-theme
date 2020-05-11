@@ -31,8 +31,16 @@ _git_super_status() {
 }
 
 _curr_path() {
-    if [ -z "$VIRTUAL_ENV" ]; then
-      echo "%~"
+  if [ -z "$VIRTUAL_ENV" ]; then
+    echo "%~"
+  else
+    ENV_BASE=`basename $VIRTUAL_ENV`
+    if [ -d "$VIRTUAL_ENV/src/$ENV_BASE" ]; then
+      if [ "$VIRTUAL_ENV/src/$ENV_BASE" = "$(pwd)" ]; then
+        echo "$(virtualenv_prompt_info)"
+      else
+        echo "$(virtualenv_prompt_info)/$(realpath --relative-to=$VIRTUAL_ENV/src/$ENV_BASE $(pwd))"
+      fi
     else
       if [ "$VIRTUAL_ENV/src" = "$(pwd)" ]; then
         echo "$(virtualenv_prompt_info)"
@@ -40,6 +48,7 @@ _curr_path() {
         echo "$(virtualenv_prompt_info)/$(realpath --relative-to=$VIRTUAL_ENV/src $(pwd))"
       fi
     fi
+  fi
 }
 
 PROMPT="%(?:%{$fg_bold[green]%}➜ %n:%{$fg_bold[red]%}➜ %n)"
