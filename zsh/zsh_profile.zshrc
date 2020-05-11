@@ -16,7 +16,8 @@ plugins=(
   cp 
   brew 
   osx 
-  virtualenv
+  virtualenv 
+  git-open 
 )
 
 source $ZSH/oh-my-zsh.sh
