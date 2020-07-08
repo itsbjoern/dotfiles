@@ -11,3 +11,6 @@
 
 [core]
 	excludesfile = ~/.gitignore-global
+
+[oh-my-zsh]
+  hide-status = 1

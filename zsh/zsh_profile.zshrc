@@ -1,6 +1,6 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
-
+ZSH_DISABLE_COMPFIX="true"
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/bjoern/.oh-my-zsh"
 
@@ -11,8 +11,6 @@ export ZSH="/Users/bjoern/.oh-my-zsh"
 ZSH_THEME="mine"
 
 plugins=(
-  git 
-  git-prompt 
   cp 
   brew 
   osx 
@@ -46,7 +44,7 @@ export WORKON_HOME=$HOME/code
 export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 # use the same directory for virtualenvs as virtualenvwrapper
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.7
+export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
 export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
 # makes pip detect an active virtualenv and install to it
 export PIP_RESPECT_VIRTUALENV=true
@@ -131,31 +129,40 @@ export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=10000000
 export SAVEHIST=10000000
 
-autoload -Uz compinit
-compinit
+function iterm2_print_user_vars() {
+  ENV_BASE=`basename "$VIRTUAL_ENV"`
+  CURR_DIR=$(pwd)
 
-# User configuration
+  if ! [ -z "$VIRTUAL_ENV" ]; then
+    CURR_DIR="@"
+    if [ -d "$VIRTUAL_ENV/src/$ENV_BASE" ]; then
+      if ! [ "$VIRTUAL_ENV/src/$ENV_BASE" = "$CURR_DIR" ]; then
+        CURR_DIR="@/$(realpath --relative-to=$VIRTUAL_ENV/src/$ENV_BASE $CURR_DIR)"
+      fi
+    else
+      if ! [ "$VIRTUAL_ENV/src" = "$CURR_DIR" ]; then
+        CURR_DIR="@/$(realpath --relative-to=$VIRTUAL_ENV/src $CURR_DIR)"
+      fi
+    fi
+  fi
+  if ! [ "$CURR_DIR" = "/Users/$USER" ]; then
+    CURR_DIR="~/$(realpath --relative-to=/Users/$USER $(pwd))"
+  else
+    CURR_DIR="~"
+  fi
 
-# export MANPATH="/usr/local/man:$MANPATH"
+  if [ -z "$VIRTUAL_ENV" ]; then
+    ENV_BASE="No Env"
+  else
+    ENV_BASE="@$ENV_BASE"
+  fi
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+  iterm2_set_user_var virtualEnv "$ENV_BASE"
+  iterm2_set_user_var currDir "$CURR_DIR"
+}
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
+#autoload -Uz compinit
+#compinit
 
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+source ~/.iterm2_shell_integration.zsh
