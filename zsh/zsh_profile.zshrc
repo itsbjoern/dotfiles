@@ -39,9 +39,8 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 
 # set where virutal environments will live
 export WORKON_HOME=$HOME/code
+export PYTHONWARNINGS="ignore"
 
-# ensure all new environments are isolated from the site-packages directory
-export VIRTUALENVWRAPPER_VIRTUALENV_ARGS='--no-site-packages'
 # use the same directory for virtualenvs as virtualenvwrapper
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
 export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3
@@ -134,25 +133,28 @@ function iterm2_print_user_vars() {
   CURR_DIR=$(pwd)
 
   if ! [ -z "$VIRTUAL_ENV" ]; then
-    CURR_DIR="@"
     if [ -d "$VIRTUAL_ENV/src/$ENV_BASE" ]; then
       if ! [ "$VIRTUAL_ENV/src/$ENV_BASE" = "$CURR_DIR" ]; then
         CURR_DIR="@/$(realpath --relative-to=$VIRTUAL_ENV/src/$ENV_BASE $CURR_DIR)"
+      else
+        CURR_DIR="@"
       fi
     else
       if ! [ "$VIRTUAL_ENV/src" = "$CURR_DIR" ]; then
         CURR_DIR="@/$(realpath --relative-to=$VIRTUAL_ENV/src $CURR_DIR)"
+      else
+        CURR_DIR="@"
       fi
     fi
-  fi
-  if ! [ "$CURR_DIR" = "/Users/$USER" ]; then
-    CURR_DIR="~/$(realpath --relative-to=/Users/$USER $(pwd))"
-  else
-    CURR_DIR="~"
   fi
 
   if [ -z "$VIRTUAL_ENV" ]; then
     ENV_BASE="No Env"
+    if ! [ "$CURR_DIR" = "/Users/$USER" ]; then
+      CURR_DIR="~/$(realpath --relative-to=/Users/$USER $(pwd))"
+    else
+      CURR_DIR="~"
+    fi
   else
     ENV_BASE="@$ENV_BASE"
   fi
@@ -161,6 +163,9 @@ function iterm2_print_user_vars() {
   iterm2_set_user_var currDir "$CURR_DIR"
 }
 
+DISABLE_AUTO_TITLE="true"
+precmd () { print -Pn "\e]2;$(realpath --relative-to=/Users/$USER $(pwd)) $ENV_BASE\a" }
+title() { export TITLE="$*" }
 
 #autoload -Uz compinit
 #compinit
