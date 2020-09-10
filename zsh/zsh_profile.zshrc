@@ -146,7 +146,7 @@ function iterm2_print_user_vars() {
         CURR_DIR="@"
       fi
     fi
-    ENV_BASE="@$ENV_BASE"
+    ENV_BASE="$ENV_BASE"
   else
     ENV_BASE="No Env"
     if ! [ "$CURR_DIR" = "/Users/$USER" ]; then
