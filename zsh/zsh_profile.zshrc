@@ -60,6 +60,11 @@ alias mongo='docker exec -ti mongodb mongo'
 alias pcalc='python -i -c "from __future__ import division"'
 alias python2="/usr/bin/python2"
 
+function diff() {
+  [[ ! -z "$1" ]] && B="$1" || B="development"
+  git merge-base $(git branch --show-current) $B | xargs git diff
+}
+
 function getpass() {
     SEARCH="$@";
 
