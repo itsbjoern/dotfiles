@@ -1,6 +1,7 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 ZSH_DISABLE_COMPFIX="true"
+DISABLE_AUTO_TITLE="true"
 # Path to your oh-my-zsh installation.
 export ZSH="/Users/bjoern/.oh-my-zsh"
 
@@ -128,7 +129,7 @@ export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=10000000
 export SAVEHIST=10000000
 
-function iterm2_print_user_vars() {
+function set_env_and_dir() {
   CURR_DIR=$(pwd)
 
   if ! [ -z "$VIRTUAL_ENV" ]; then
@@ -156,13 +157,22 @@ function iterm2_print_user_vars() {
     fi
   fi
 
-  iterm2_set_user_var virtualEnv "$ENV_BASE"
-  iterm2_set_user_var currDir "$CURR_DIR"
+  CUSTOM_DISPLAY_PATH="$CURR_DIR"
+  CUSTOM_DISPLAY_ENV="$ENV_BASE"
 }
 
-DISABLE_AUTO_TITLE="true"
-# precmd () { print -Pn "\e]2;$(realpath --relative-to=/Users/$USER $(pwd)) $ENV_BASE\a" }
-title() { export TITLE="$*" }
+function iterm2_print_user_vars() {
+  set_env_and_dir
+
+  iterm2_set_user_var virtualEnv "$CUSTOM_DISPLAY_ENV"
+  iterm2_set_user_var currDir "$CUSTOM_DISPLAY_PATH"
+}
+
+precmd () {
+  set_env_and_dir
+  print -Pn "\e]2;$CUSTOM_DISPLAY_ENV - $CUSTOM_DISPLAY_PATH\a"
+}
+# title() { export TITLE="@$ENV_BASE - $*" }
 
 #autoload -Uz compinit
 #compinit
