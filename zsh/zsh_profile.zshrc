@@ -41,6 +41,7 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 # set where virutal environments will live
 export WORKON_HOME=$HOME/code
 export PYTHONWARNINGS="ignore"
+export DISABLE_UPDATE_PROMPT=true
 
 # use the same directory for virtualenvs as virtualenvwrapper
 export PIP_VIRTUALENV_BASE=$WORKON_HOME
