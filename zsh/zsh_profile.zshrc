@@ -183,4 +183,7 @@ precmd () {
 #autoload -Uz compinit
 #compinit
 
+unsetopt inc_append_history
+unsetopt share_history
+
 source ~/.iterm2_shell_integration.zsh
