@@ -57,7 +57,6 @@ fi
 
 alias o=open
 alias c=clear && printf '\e[3J'
-alias mongo='docker exec -ti mongodb mongo'
 alias pcalc='python -i -c "from __future__ import division"'
 alias python2="/usr/bin/python2"
 
