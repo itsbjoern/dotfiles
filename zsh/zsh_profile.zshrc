@@ -14,7 +14,7 @@ ZSH_THEME="mine"
 plugins=(
   cp 
   brew 
-  osx 
+  macos 
   virtualenv 
   git-open 
 )
