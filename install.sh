@@ -1,21 +1,59 @@
-#!/bin/bash
-
-if [  ! -d "bash/bash-me" ] ;then
-  cd bash
-  git clone git@github.com:BFriedrichs/bash-me.git
-  cd ..
+which -s brew
+if [[ $? != 0 ]] ; then
+    # Install Homebrew
+    echo "Homebrew not found... Installing"
+    ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 fi
 
-if [ -f ~/.git-completion.bash ]; then
-  curl https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
+which -s realpath
+if [[ $? != 0 ]] ; then
+    echo "Coreutils not found... Installing"
+    brew install coreutils
 fi
 
-echo Symlinking dotfiles...
-rm -rf ~/.bash_profile
+which -s tmux
+if [[ $? != 0 ]] ; then
+    echo "tmux not found... Installing"
+    brew install tmux
+fi
+
+if [  ! -d "/Users/$USER/.oh-my-zsh" ] ;then
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+fi
+
+if [  ! -d "/Users/$USER/.oh-my-zsh/custom/plugins/git-open" ] ;then
+  sh -c "git clone https://github.com/paulirish/git-open.git /Users/$USER/.oh-my-zsh/custom/plugins/git-open"
+fi
+
+if [  ! -d "/Users/$USER/.tmux/plugins/tpm" ] ;then
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+if [  ! -d "/Users/$USER/.tmux/fonts" ] ;then
+  git clone https://github.com/powerline/fonts.git --depth=1 ~/.tmux/fonts
+  sh -c "~/.tmux/fonts/install.sh"
+fi
+
+mkdir -p ~/.tmux
+
+rm -rf ~/.zshrc
 rm -rf ~/.gitignore-global
 rm -rf ~/.gitconfig
+rm -rf ~/.oh-my-zsh/themes/mine.zsh-theme
+rm -rf ~/.tmux.conf
+rm -rf ~/.tmux/status
 
-ln -s "$PWD/bash/bash_profile" ~/.bash_profile
+ln -s "$PWD/zsh/zsh_profile.zshrc" ~/.zshrc
+ln -s "$PWD/zsh/mine.zsh-theme" ~/.oh-my-zsh/themes/mine.zsh-theme
 ln -s "$PWD/extras/.gitconfig" ~/.gitconfig
 ln -s "$PWD/extras/.gitignore-global" ~/.gitignore-global
+ln -s "$PWD/tmux/.tmux.conf" ~/.tmux.conf
+ln -s "$PWD/tmux/status" ~/.tmux/status
+
 git config --global core.excludesfile '~/.gitignore-global'
+
+sh -c "~/.tmux/plugins/tpm/bin/install_plugins"
+sh -c "~/.tmux/plugins/tpm/bin/update_plugins all"
+
+echo "\n* Done! To enable all changes restart shell or run:"
+echo "    source ~/.zshrc\n"

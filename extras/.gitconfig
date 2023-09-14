@@ -1,13 +1,10 @@
 [user]
-  name = "Björn Friedrichs"
+  name = Björn Friedrichs
   email = bjoern@friedrichs1.de
 
 [push]
   default = upstream
-
-[alias]
-  change-commits = "!f() { VAR=$1; OLD=$2; NEW=$3; shift 3; git filter-branch --env-filter \"if [[ \\\"$`echo $VAR`\\\" = '$OLD' ]]; then export $VAR='$NEW'; fi\" $@; }; f "
-  remove-file = "!f() { git filter-branch -f --index-filter \"git rm --cached --ignore-unmatch $1\" --prune-empty --tag-name-filter cat -- --all; }; f"
+  autoSetupRemote = true
 
 [core]
 	excludesfile = ~/.gitignore-global
@@ -16,4 +13,10 @@
   hide-status = 1
 
 [pull]
-	rebase = false
+	rebase = true
+
+[diff]
+  tool = vscode
+
+[difftool "vscode"]
+   cmd = code --wait --diff $LOCAL $REMOTE
