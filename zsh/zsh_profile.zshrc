@@ -30,12 +30,12 @@ zstyle ':completion:::*:default' expand suffix
 
 # source ~/.iterm2_shell_integration.zsh
 
-my-backward-delete-word() {
-    local WORDCHARS=${WORDCHARS/\//}
-    zle backward-delete-word
-}
-zle -N my-backward-delete-word
-bindkey '^[' my-backward-delete-word
+# my-backward-delete-word() {
+#     local WORDCHARS=${WORDCHARS/\//}
+#     zle backward-delete-word
+# }
+# zle -N my-backward-delete-word
+# bindkey '^[' my-backward-delete-word
 
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bg=cyan,bold,underline"
 # https://github.com/zsh-users/zsh-autosuggestions/issues/515
@@ -52,14 +52,14 @@ export EDITOR='vim'
 
 # use the same directory for virtualenvs as virtualenvwrapper
 export PIP_VIRTUALVENV_STATUS=$WORKON_HOME
-export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3.8
-export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+export VIRTUALENVWRAPPER_PYTHON="$HOMEBREW_PREFIX/bin/python3"
+export VIRTUALENVWRAPPER_VIRTUALENV="$HOMEBREW_PREFIX/bin/virtualenv"
 export VIRTUALENVWRAPPER_HOOK_DIR="$(dirname $(readlink ~/.zshrc))/../venv-hooks"
 
 # makes pip detect an active virtualenv and install to it
 export PIP_RESPECT_VIRTUALENV=true
-if [[ -r /usr/local/bin/virtualenvwrapper.sh ]]; then
-    source /usr/local/bin/virtualenvwrapper.sh
+if [[ -r $HOMEBREW_PREFIX/bin/virtualenvwrapper.sh ]]; then
+    source $HOMEBREW_PREFIX/bin/virtualenvwrapper.sh
 else
     echo "WARNING: Can't find virtualenvwrapper.sh"
 fi
@@ -67,7 +67,7 @@ fi
 alias o=open
 alias c=clear && printf '\e[3J'
 alias wo=workon
-alias python2="/usr/bin/python2"
+alias python2="$HOMEBREW_PREFIX/bin/python2"
 
 export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export CPPFLAGS="-I/usr/local/opt/zlib/include"
@@ -110,7 +110,7 @@ function a() {
 
 export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-export PATH="/usr/local/opt/python/libexec/bin:/usr/local/sbin:$PATH"
+export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
 
 export HISTFILE="$HOME/.zsh_history"
 export HISTSIZE=10000000
@@ -130,13 +130,13 @@ function iterm2_print_user_vars() {
 
     if [ -d "$ENV_FOLDER" ]; then
       if ! [ "$ENV_FOLDER" = "$DIR_STATUS" ]; then
-        DIR_STATUS="@/$(realpath --relative-to=$ENV_FOLDER $DIR_STATUS)"
+        DIR_STATUS="@/$(grealpath --relative-to=$ENV_FOLDER $DIR_STATUS)"
       else
         DIR_STATUS="@"
       fi
     else
       if ! [ "$VIRTUAL_ENV/src" = "$DIR_STATUS" ]; then
-        DIR_STATUS="@/$(realpath --relative-to=$VIRTUAL_ENV/src $DIR_STATUS)"
+        DIR_STATUS="@/$(grealpath --relative-to=$VIRTUAL_ENV/src $DIR_STATUS)"
       else
         DIR_STATUS="@"
       fi
@@ -145,7 +145,7 @@ function iterm2_print_user_vars() {
   else
     VENV_STATUS=""
     if ! [ "$DIR_STATUS" = "/Users/$USER" ]; then
-      DIR_STATUS="~/$(realpath --relative-to=/Users/$USER $DIR_STATUS)"
+      DIR_STATUS="~/$(grealpath --relative-to=/Users/$USER $DIR_STATUS)"
     else
       DIR_STATUS="~"
     fi
