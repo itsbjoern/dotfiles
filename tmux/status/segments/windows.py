@@ -25,6 +25,8 @@ class WindowsSegment(SegmentGroup):
         for i, window in enumerate(windows):
             buffer = " " * len(window.window_name)
             content = if_prefix_active(buffer + window.window_id, window.window_name)
+            if window.is_zoomed:
+                content += f" (+{window.pane_count - 1})"
             segments.append(
                 Segment(
                     content=content,
