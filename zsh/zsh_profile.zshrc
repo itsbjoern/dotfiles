@@ -71,6 +71,8 @@ alias python2="$HOMEBREW_PREFIX/bin/python2"
 unalias brew 2>/dev/null
 brewser=$(stat -f "%Su" $(which brew))
 alias brew='sudo -Hu '$brewser' brew'
+# Any additional user needs to be a sudo user as follow:
+# <user>        ALL = (<brewser>) NOPASSWD: /opt/homebrew/bin/brew
 
 export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export CPPFLAGS="-I/usr/local/opt/zlib/include"
