@@ -40,7 +40,6 @@ zstyle ':completion:::*:default' expand suffix
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bg=cyan,bold,underline"
 # https://github.com/zsh-users/zsh-autosuggestions/issues/515
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-autoload -Uz compinit && compinit
 
 # set where virutal environments will live
 export VIRTUAL_ENV_DISABLE_PROMPT=1
@@ -68,6 +67,10 @@ alias o=open
 alias c=clear && printf '\e[3J'
 alias wo=workon
 alias python2="$HOMEBREW_PREFIX/bin/python2"
+
+unalias brew 2>/dev/null
+brewser=$(stat -f "%Su" $(which brew))
+alias brew='sudo -Hu '$brewser' brew'
 
 export LDFLAGS="-L/usr/local/opt/zlib/lib"
 export CPPFLAGS="-I/usr/local/opt/zlib/include"
