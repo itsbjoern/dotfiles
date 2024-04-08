@@ -21,8 +21,8 @@ if [  ! -d "/Users/$USER/.oh-my-zsh" ] ;then
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 fi
 
-if [  ! -d "/Users/$USER/.oh-my-zsh/custom/plugins/git-open" ] ;then
-  sh -c "git clone https://github.com/paulirish/git-open.git /Users/$USER/.oh-my-zsh/custom/plugins/git-open"
+if [  ! -d "/Users/$USER/.oh-my-zsh/custom/plugins/zsh-autosuggestions" ] ;then
+  sh -c "git clone https://github.com/zsh-users/zsh-autosuggestions /Users/$USER/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
 fi
 
 if [  ! -d "/Users/$USER/.tmux/plugins/tpm" ] ;then

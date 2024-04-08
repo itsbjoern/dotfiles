@@ -18,6 +18,7 @@ plugins=(
   macos 
   virtualenv 
   git 
+  zsh-autosuggestions 
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -37,7 +38,7 @@ zstyle ':completion:::*:default' expand suffix
 # zle -N my-backward-delete-word
 # bindkey '^[' my-backward-delete-word
 
-ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#ff00ff,bg=cyan,bold,underline"
+ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=cyan,bg=none,bold,underline"
 # https://github.com/zsh-users/zsh-autosuggestions/issues/515
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
