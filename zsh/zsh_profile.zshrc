@@ -68,7 +68,11 @@ alias o=open
 alias c=clear && printf '\e[3J'
 alias wo=workon
 alias python2="$HOMEBREW_PREFIX/bin/python2"
-alias ghpr="gh pr create --base $(git_develop_branch) -w"
+alias ghpr="gh pr create --base ${git_develop_branch:=development} -w"
+
+function woa() {
+  workon $1; a;
+}
 
 unalias brew 2>/dev/null
 brewser=$(stat -f "%Su" $(which brew))
