@@ -1,0 +1,53 @@
+# This file contains fish universal variable definitions.
+# VERSION: 3.0
+SETUVAR --export EDITOR:code
+SETUVAR --export HOMEBREW_PREFIX:/opt/homebrew
+SETUVAR --export PIP_RESPECT_VIRTUALENV:true
+SETUVAR --export PIP_VIRTUALVENV_STATUS:/Users/personal/code
+SETUVAR --export PNPM_HOME:\x7e/Library/pnpm
+SETUVAR --export PYTHONWARNINGS:ignore
+SETUVAR --export VIRTUAL_ENV_DISABLE_PROMPT:1
+SETUVAR --export --path VIRTUAL_ENV_REL_PATH:\x7e/dotfiles
+SETUVAR --export WORKON_HOME:/Users/personal/code
+SETUVAR __fish_initialized:3400
+SETUVAR fish_color_autosuggestion:767676
+SETUVAR fish_color_cancel:\x2d\x2dreverse
+SETUVAR fish_color_command:87afff
+SETUVAR fish_color_comment:767676
+SETUVAR fish_color_cwd:585C80
+SETUVAR fish_color_cwd_root:red
+SETUVAR fish_color_end:ff5fff
+SETUVAR fish_color_error:585858
+SETUVAR fish_color_escape:95E6CB
+SETUVAR fish_color_history_current:\x2d\x2dbold
+SETUVAR fish_color_host:normal
+SETUVAR fish_color_host_remote:\x1d
+SETUVAR fish_color_keyword:\x1d
+SETUVAR fish_color_match:F07178
+SETUVAR fish_color_normal:B3B1AD
+SETUVAR fish_color_operator:E6B450
+SETUVAR fish_color_option:\x1d
+SETUVAR fish_color_param:e4e4e4
+SETUVAR fish_color_quote:C2D94C
+SETUVAR fish_color_redirection:FFEE99
+SETUVAR fish_color_search_match:\x2d\x2dbackground\x3d484c60
+SETUVAR fish_color_selection:\x2d\x2dbackground\x3d484c60
+SETUVAR fish_color_status:red
+SETUVAR fish_color_user:brgreen
+SETUVAR fish_color_valid_path:\x2d\x2dunderline
+SETUVAR fish_greeting:\x1d
+SETUVAR fish_key_bindings:fish_default_key_bindings
+SETUVAR fish_pager_color_background:\x1d
+SETUVAR fish_pager_color_completion:normal
+SETUVAR fish_pager_color_description:B3A06D
+SETUVAR fish_pager_color_prefix:normal\x1e\x2d\x2dbold\x1e\x2d\x2dunderline
+SETUVAR fish_pager_color_progress:brwhite\x1e\x2d\x2dbackground\x3dcyan
+SETUVAR fish_pager_color_secondary_background:\x1d
+SETUVAR fish_pager_color_secondary_completion:\x1d
+SETUVAR fish_pager_color_secondary_description:\x1d
+SETUVAR fish_pager_color_secondary_prefix:\x1d
+SETUVAR fish_pager_color_selected_background:\x2d\x2dbackground\x3d484c60
+SETUVAR fish_pager_color_selected_completion:\x1d
+SETUVAR fish_pager_color_selected_description:\x1d
+SETUVAR fish_pager_color_selected_prefix:\x1d
+SETUVAR --export fish_user_paths:\x7e/Library/pnpm\x1e/opt/homebrew/opt/python/libexec/bin\x1e/usr/local/opt/node\x4016/bin\x1e/Applications/WezTerm\x2eapp/Contents/MacOS\x1e/Applications/Visual\x20Studio\x20Code\x2eapp/Contents/Resources/app/bin\x1e/usr/local/sbin

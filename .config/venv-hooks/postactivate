@@ -1,4 +1,2 @@
 #!/bin/zsh
 # This hook is sourced after every virtualenv is activated.
-
-# iterm2_print_user_vars
