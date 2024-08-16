@@ -13,7 +13,7 @@ function fish_prompt --description 'Write out the prompt'
         end
     end
 
-    # auto_workon
+    auto_workon
     set_venv_vars
 
     echo -n -s (set_color $color_cwd)▸' '

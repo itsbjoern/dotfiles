@@ -151,11 +151,11 @@ function set_venv_vars
         if test -e $VIRTUAL_ENV/.project
             set VIRTUAL_ENV_SRC_FOLDER $(cat $VIRTUAL_ENV/.project)
             set VIRTUAL_ENV_STATUS_LABEL "*"
-        end
-
-        # Test if src folder should be adjusted to the virtualenv name
-        if test -d $VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME
-            set VIRTUAL_ENV_SRC_FOLDER $VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME
+        else
+            # Test if src folder should be adjusted to the virtualenv name
+            if test -d $VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME
+                set VIRTUAL_ENV_SRC_FOLDER $VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME
+            end
         end
 
         # Set relative path
@@ -194,6 +194,8 @@ function auto_workon
 
     set GIT_FOLDER $(git rev-parse --show-toplevel 2>/dev/null)
     if test -n "$GIT_FOLDER"
-        workon $(basename "$GIT_FOLDER")
+        if test -d "$WORKON_HOME/$GIT_FOLDER"
+            workon $(basename "$GIT_FOLDER")
+        end
     end
 end

@@ -81,6 +81,7 @@ config.hide_tab_bar_if_only_one_tab = false
 config.tab_bar_at_bottom = true
 config.show_new_tab_button_in_tab_bar = false
 -- config.show_close_tab_button_in_tabs = false
+config.pane_focus_follows_mouse = true
 
 config.adjust_window_size_when_changing_font_size = false
 config.inactive_pane_hsb = { brightness = 0.9 }
@@ -119,8 +120,16 @@ wezterm.on(
   'format-tab-title',
   function(tab, tabs, panes, config, hover, max_width)
     local title = tab_title(tab)
-    local title = string.format("%-" .. math.min(string.len(title) - 4, 2) .. "s", title)
+    local user_vars = tab.active_pane.user_vars
+    wezterm.log_info("apane: ", tab.active_pane)
 
+    local venv_name = user_vars.VIRTUAL_ENV_NAME
+    wezterm.log_info("user_vars: ", user_vars)
+    if not isempty(venv_name) then
+      local title = " [" .. venv_name .. "]" .. title
+    end
+
+    local title = string.format("%-" .. math.max(string.len(title) - 4, 1) .. "s", title)
     if tab.is_active then
       return {
         { Background = { Color = '#282c34' } },
@@ -131,16 +140,10 @@ wezterm.on(
   end
 )
 
-config.keys = {
-  -- CTRL-SHIFT-l activates the debug overlay
-  { key = 'p', mods = 'CTRL', action = wezterm.action.ShowDebugOverlay },
-}
-
 wezterm.on('update-right-status', function(window, pane)
   local date = wezterm.strftime '%Y-%m-%d %H:%M:%S'
 
   local user_vars = pane:get_user_vars()
-  wezterm.log_info("user_vars: ", user_vars)
   local path = user_vars.VIRTUAL_ENV_REL_PATH or ""
 
   local status_list = {
@@ -165,5 +168,97 @@ wezterm.on('update-right-status', function(window, pane)
 
   window:set_right_status(wezterm.format(status_list))
 end)
+
+
+config.mouse_bindings = {
+  -- Open URLs with CMD+Click
+  {
+    event = { Up = { streak = 1, button = 'Left' } },
+    mods = 'CMD',
+    action = wezterm.action.OpenLinkAtMouseCursor,
+  },
+}
+
+
+config.keys = {
+  -- CTRL-SHIFT-l activates the debug overlay
+  { key = 'p', mods = 'CTRL', action = wezterm.action.ShowDebugOverlay },
+
+   -- Vertical pipe (|) -> horizontal split
+   {
+    key = '\\',
+    mods = 'CMD|SHIFT',
+    action = wezterm.action.SplitHorizontal {
+      domain = 'CurrentPaneDomain'
+    },
+  },
+  -- Underscore (_) -> vertical split
+  {
+    key = '\\',
+    mods = 'CMD',
+    action = wezterm.action.SplitVertical {
+      domain = 'CurrentPaneDomain'
+    },
+  },
+
+    -- Move to a pane (prompt to which one)
+    {
+      mods = "CMD", key = "m",
+      action = wezterm.action.PaneSelect
+    },
+
+    {
+      key = "LeftArrow",
+      mods = "CMD",
+      action = wezterm.action.ActivatePaneDirection('Left')
+    },
+    {
+      key = "RightArrow",
+      mods = "CMD",
+      action = wezterm.action.ActivatePaneDirection('Right')
+    },
+    {
+      key = "DownArrow",
+      mods = "CMD",
+      action = wezterm.action.ActivatePaneDirection('Down')
+    },
+    {
+      key = "UpArrow",
+      mods = "CMD",
+      action = wezterm.action.ActivatePaneDirection('Up')
+    },
+
+    {
+      key = "LeftArrow",
+      mods = "SHIFT|CMD",
+      action = wezterm.action.MoveTabRelative(-1)
+    },
+    {
+      key = "RightArrow",
+      mods = "SHIFT|CMD",
+      action = wezterm.action.MoveTabRelative(1)
+    },
+
+    -- w to close pane, CMD+w to close tab
+    {
+      key = "w",
+      mods = "CMD",
+      action = wezterm.action.CloseCurrentPane { confirm = true }
+    },
+
+    {
+      key = "w",
+      mods = "CMD|SHIFT",
+      action = wezterm.action.CloseCurrentTab { confirm = true }
+    },
+
+      -- Use CMD+z to enter zoom state
+    {
+      key = 'z',
+      mods = 'CMD',
+      action = wezterm.action.TogglePaneZoomState,
+    },
+}
+
 
 return config
