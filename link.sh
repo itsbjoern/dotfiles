@@ -1,0 +1,1 @@
+fish exec link.fish

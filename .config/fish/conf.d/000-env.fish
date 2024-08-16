@@ -5,7 +5,7 @@ set -Ux VIRTUAL_ENV_DISABLE_PROMPT 1
 set -Ux WORKON_HOME $HOME/code
 set -Ux PYTHONWARNINGS "ignore"
 
-set -Ux EDITOR "code"
+set -Ux EDITOR "vim"
 
 # use the same directory for virtualenvs as virtualenvwrapper
 set -Ux PIP_VIRTUALVENV_STATUS $WORKON_HOME

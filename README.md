@@ -15,3 +15,10 @@ Spotlight
 
 Modifier Keys
 * Change "Caps Lock" to "Escape"
+
+## Homebrew
+
+If brew is installed as specific user, add the following line to sudoers (visudo) file for any brew user:
+```
+bjoern          ALL = (bjoern) NOPASSWD: /opt/homebrew/bin/brew, /usr/sbin/installer
+```
