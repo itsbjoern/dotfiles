@@ -142,15 +142,15 @@ function set_venv_vars --on-event fish_prompt
     set CURR_DIR $(pwd)
 
     if test -n "$VIRTUAL_ENV"
-        set VIRTUAL_ENV_STATUS_LABEL ""
         set VIRTUAL_ENV_REL_PATH ""
+        set VIRTUAL_ENV_IS_PROJECT "false"
         set VIRTUAL_ENV_NAME $(basename $VIRTUAL_ENV)
         set VIRTUAL_ENV_SRC_FOLDER $VIRTUAL_ENV/src
 
         # Set label if we follow a project link
         if test -e $VIRTUAL_ENV/.project
             set VIRTUAL_ENV_SRC_FOLDER $(cat $VIRTUAL_ENV/.project)
-            set VIRTUAL_ENV_STATUS_LABEL "*"
+            set VIRTUAL_ENV_IS_PROJECT "true"
         else
             # Test if src folder should be adjusted to the virtualenv name
             if test -d $VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME
@@ -181,7 +181,7 @@ function set_venv_vars --on-event fish_prompt
     end
 
     set_wezterm_var VIRTUAL_ENV_NAME $VIRTUAL_ENV_NAME
-    set_wezterm_var VIRTUAL_ENV_STATUS_LABEL $VIRTUAL_ENV_STATUS_LABEL
+    set_wezterm_var VIRTUAL_ENV_IS_PROJECT $VIRTUAL_ENV_IS_PROJECT
     set_wezterm_var VIRTUAL_ENV_REL_PATH $VIRTUAL_ENV_REL_PATH
     set_wezterm_var GIT_BRANCH_STATUS $GIT_BRANCH_STATUS
 end

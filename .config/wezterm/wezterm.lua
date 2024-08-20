@@ -130,9 +130,9 @@ wezterm.on(
 
     local venv_name = user_vars.VIRTUAL_ENV_NAME or env_cache.VIRTUAL_ENV_NAME
     local venv_path = user_vars.VIRTUAL_ENV_REL_PATH or env_cache.VIRTUAL_ENV_REL_PATH
-    wezterm.log_info("venv_name: " .. venv_name)
+    local is_project = user_vars.VIRTUAL_ENV_IS_PROJECT or env_cache.VIRTUAL_ENV_IS_PROJECT
     if not isempty(venv_name) then
-      title = venv_path
+      title = venv_name .. " " .. venv_path
     end
 
     local title = string.format("%-" .. math.max(4 - string.len(title), 1) .. "s", title)
