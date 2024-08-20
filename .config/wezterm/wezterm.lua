@@ -116,33 +116,38 @@ function tab_title(tab_info)
   return tab_info.active_pane.title
 end
 
+env_cache = {}
+
 wezterm.on(
   'format-tab-title',
   function(tab, tabs, panes, config, hover, max_width)
     local title = tab_title(tab)
     local user_vars = tab.active_pane.user_vars
-    wezterm.log_info("apane: ", tab.active_pane)
 
-    local venv_name = user_vars.VIRTUAL_ENV_NAME
-    wezterm.log_info("user_vars: ", user_vars)
-    if not isempty(venv_name) then
-      local title = " [" .. venv_name .. "]" .. title
+    for k, v in pairs(user_vars) do
+      env_cache[k] = v
     end
 
-    local title = string.format("%-" .. math.max(string.len(title) - 4, 1) .. "s", title)
+    local venv_name = user_vars.VIRTUAL_ENV_NAME or env_cache.VIRTUAL_ENV_NAME
+    local venv_path = user_vars.VIRTUAL_ENV_REL_PATH or env_cache.VIRTUAL_ENV_REL_PATH
+    wezterm.log_info("venv_name: " .. venv_name)
+    if not isempty(venv_name) then
+      title = venv_path
+    end
+
+    local title = string.format("%-" .. math.max(4 - string.len(title), 1) .. "s", title)
+
     if tab.is_active then
       return {
         { Background = { Color = '#282c34' } },
         { Text = ' ' .. title .. ' ' },
       }
     end
-    return title
+    return ' ' .. title .. ' '
   end
 )
 
 wezterm.on('update-right-status', function(window, pane)
-  local date = wezterm.strftime '%Y-%m-%d %H:%M:%S'
-
   local user_vars = pane:get_user_vars()
   local path = user_vars.VIRTUAL_ENV_REL_PATH or ""
 

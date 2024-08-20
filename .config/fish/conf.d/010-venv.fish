@@ -138,7 +138,7 @@ end
 
 
 
-function set_venv_vars
+function set_venv_vars --on-event fish_prompt
     set CURR_DIR $(pwd)
 
     if test -n "$VIRTUAL_ENV"
@@ -187,7 +187,7 @@ function set_venv_vars
 end
 
 
-function auto_workon
+function auto_workon --on-event fish_prompt
     if test -n "$VIRTUAL_ENV"
         return
     end

@@ -3,12 +3,12 @@
 SETUVAR --export EDITOR:vim
 SETUVAR --export HOMEBREW_PREFIX:/opt/homebrew
 SETUVAR --export PIP_RESPECT_VIRTUALENV:true
-SETUVAR --export PIP_VIRTUALVENV_STATUS:/Users/bjoern/code
+SETUVAR --export PIP_VIRTUALVENV_STATUS:/Users/personal/code
 SETUVAR --export PNPM_HOME:\x7e/Library/pnpm
 SETUVAR --export PYTHONWARNINGS:ignore
 SETUVAR --export VIRTUAL_ENV_DISABLE_PROMPT:1
 SETUVAR --export --path VIRTUAL_ENV_REL_PATH:\x7e/dotfiles
-SETUVAR --export WORKON_HOME:/Users/bjoern/code
+SETUVAR --export WORKON_HOME:/Users/personal/code
 SETUVAR __fish_initialized:3400
 SETUVAR fish_color_autosuggestion:767676
 SETUVAR fish_color_cancel:\x2d\x2dreverse
