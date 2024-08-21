@@ -11,6 +11,9 @@ config.set_environment_variables = {
   PATH = '/opt/homebrew/bin:' .. os.getenv('PATH'),
 }
 
+config.bypass_mouse_reporting_modifiers = 'ALT'
+config.enable_scroll_bar = true
+
 config.font_dirs = {
   ("/Users/" .. username .. "/dotfiles/fonts"),
   ("/Users/" .. username .. "code/dotfiles/src/dotfiles/fonts"),
