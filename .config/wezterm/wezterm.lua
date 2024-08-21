@@ -138,7 +138,7 @@ wezterm.on(
       title = venv_name .. " " .. venv_path
     end
 
-    local title = string.format("%-" .. math.max(4 - string.len(title), 1) .. "s", title)
+    local title = tostring(tab.tab_index + 1) .. ' ' .. string.format("%-" .. math.max(4 - string.len(title), 1) .. "s", title)
 
     if tab.is_active then
       return {
