@@ -198,6 +198,11 @@ config.mouse_bindings = {
 
 
 config.keys = {
+  -- Make Option-Left equivalent to Alt-b which many line editors interpret as backward-word
+  {key="LeftArrow", mods="OPT", action=wezterm.action{SendString="\x1bb"}},
+  -- Make Option-Right equivalent to Alt-f; forward-word
+  {key="RightArrow", mods="OPT", action=wezterm.action{SendString="\x1bf"}},
+
   -- CTRL-SHIFT-l activates the debug overlay
   { key = 'p', mods = 'CTRL', action = wezterm.action.ShowDebugOverlay },
 
@@ -218,63 +223,63 @@ config.keys = {
     },
   },
 
-    -- Move to a pane (prompt to which one)
-    {
-      mods = "CMD", key = "m",
-      action = wezterm.action.PaneSelect
-    },
+  -- Move to a pane (prompt to which one)
+  {
+    mods = "CMD", key = "m",
+    action = wezterm.action.PaneSelect
+  },
 
-    {
-      key = "LeftArrow",
-      mods = "CMD",
-      action = wezterm.action.ActivatePaneDirection('Left')
-    },
-    {
-      key = "RightArrow",
-      mods = "CMD",
-      action = wezterm.action.ActivatePaneDirection('Right')
-    },
-    {
-      key = "DownArrow",
-      mods = "CMD",
-      action = wezterm.action.ActivatePaneDirection('Down')
-    },
-    {
-      key = "UpArrow",
-      mods = "CMD",
-      action = wezterm.action.ActivatePaneDirection('Up')
-    },
+  {
+    key = "LeftArrow",
+    mods = "CMD",
+    action = wezterm.action.ActivatePaneDirection('Left')
+  },
+  {
+    key = "RightArrow",
+    mods = "CMD",
+    action = wezterm.action.ActivatePaneDirection('Right')
+  },
+  {
+    key = "DownArrow",
+    mods = "CMD",
+    action = wezterm.action.ActivatePaneDirection('Down')
+  },
+  {
+    key = "UpArrow",
+    mods = "CMD",
+    action = wezterm.action.ActivatePaneDirection('Up')
+  },
 
-    {
-      key = "LeftArrow",
-      mods = "SHIFT|CMD",
-      action = wezterm.action.MoveTabRelative(-1)
-    },
-    {
-      key = "RightArrow",
-      mods = "SHIFT|CMD",
-      action = wezterm.action.MoveTabRelative(1)
-    },
+  {
+    key = "LeftArrow",
+    mods = "SHIFT|CMD",
+    action = wezterm.action.MoveTabRelative(-1)
+  },
+  {
+    key = "RightArrow",
+    mods = "SHIFT|CMD",
+    action = wezterm.action.MoveTabRelative(1)
+  },
 
-    -- w to close pane, CMD+w to close tab
-    {
-      key = "w",
-      mods = "CMD",
-      action = wezterm.action.CloseCurrentPane { confirm = true }
-    },
+  -- w to close pane, CMD+w to close tab
+  {
+    key = "w",
+    mods = "CMD",
+    action = wezterm.action.CloseCurrentPane { confirm = true }
+  },
 
-    {
-      key = "w",
-      mods = "CMD|SHIFT",
-      action = wezterm.action.CloseCurrentTab { confirm = true }
-    },
+  {
+    key = "w",
+    mods = "CMD|SHIFT",
+    action = wezterm.action.CloseCurrentTab { confirm = true }
+  },
 
-      -- Use CMD+z to enter zoom state
-    {
-      key = 'z',
-      mods = 'CMD',
-      action = wezterm.action.TogglePaneZoomState,
-    },
+    -- Use CMD+z to enter zoom state
+  {
+    key = 'z',
+    mods = 'CMD',
+    action = wezterm.action.TogglePaneZoomState,
+  },
 }
 
 
