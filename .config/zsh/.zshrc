@@ -75,7 +75,7 @@ setopt COMPLETE_IN_WORD     # Complete from both ends of a word.
 
 # https://github.com/zsh-users/zsh-autosuggestions/issues/515
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
-export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="bg=0,bold,underline"
+export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=4"
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 
