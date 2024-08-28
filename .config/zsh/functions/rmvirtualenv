@@ -1,0 +1,25 @@
+if [[ $# -neq 1 ]]; then
+  echo "Usage: rmvirtualenv ENVNAME"
+  return 1
+fi
+
+local VENV="$WORKON_HOME/$1"
+if [[ ! -d $VENV ]]; then
+  echo "Virtualenv \"$1\" does not exist"
+  return 1
+fi
+
+read -p "Really delete \"$1\"? [y/N] " confirm
+
+case $confirm in
+  [yY])
+  ;;
+  *)
+  return 1
+esac
+
+if [[ -n "$VIRTUAL_ENV" ]]; then
+  deactivate
+fi
+cd
+rm -rf $VENV

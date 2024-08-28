@@ -1,0 +1,35 @@
+# https://gist.github.com/mattmc3/804a8111c4feba7d95b6d7b984f12a53
+
+local usage=(
+  "Usage: mkvirtualenv [-p|--python] [-l|--link] [-n|--env] ENVNAME"
+)
+
+zparseopts -D -F -K -- \
+  {p,-python}=flag_python \
+  {l,-link}=flag_link \
+  {n,-env}:=arg_env ||
+  return 1
+
+if [[ ${#arg_env} -ne 1 ]]; then
+  echo $usage
+  return 1
+fi
+
+VENV="$WORKON_HOME/$arg_env[-1]"
+if [[ -d $VENV ]]; then
+  echo "Virtualenv \"$arg_env[-1]\" already exists"
+  return 1
+fi
+
+PYTHON_BIN="$HOMEBREW_PREFIX/bin/python3"
+if [[ -n $flag_python ]]; then
+  PYTHON_BIN="$HOMEBREW_PREFIX/bin/$flag_python"
+fi
+
+"$PYTHON_BIN" -m venv "$VENV" --upgrade-deps
+mkdir -p "$VENV/src"
+if [[ -n $flag_link ]]; then
+  echo "$(realpath $flag_link)" > "$VENV/.project"
+fi
+
+source "$VENV/bin/activate"

@@ -1,0 +1,47 @@
+CURR_DIR=$(pwd)
+
+if [ -n "$VIRTUAL_ENV" ]; then
+  VIRTUAL_ENV_REL_PATH=""
+  VIRTUAL_ENV_IS_PROJECT="false"
+  VIRTUAL_ENV_NAME=`basename "$VIRTUAL_ENV"`
+  VIRTUAL_ENV_SRC_FOLDER="$VIRTUAL_ENV/src"
+
+  if [ -f "$VIRTUAL_ENV/.project" ]; then
+    VIRTUAL_ENV_SRC_FOLDER=`cat "$VIRTUAL_ENV/.project"`
+    VIRTUAL_ENV_IS_PROJECT="true"
+  else
+    if [ -d "$VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME" ]; then
+      VIRTUAL_ENV_SRC_FOLDER="$VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME"
+    fi
+  fi
+
+  if [ ! "$VIRTUAL_ENV_SRC_FOLDER" = "$CURR_DIR" ]; then
+    VIRTUAL_ENV_REL_PATH="@/$(grealpath --relative-to=$VIRTUAL_ENV_SRC_FOLDER $CURR_DIR)"
+  else
+    VIRTUAL_ENV_REL_PATH="@"
+  fi
+else
+  VIRTUAL_ENV_NAME=""
+  if [ ! "$CURR_DIR" = "/Users/$USER" ]; then
+    VIRTUAL_ENV_REL_PATH="~/$(grealpath --relative-to=/Users/$USER $CURR_DIR)"
+  else
+    VIRTUAL_ENV_REL_PATH="~"
+  fi
+fi
+
+IS_IN_GIT=$(git rev-parse --is-inside-work-tree 2> /dev/null)
+if [ "$IS_IN_GIT" = "true" ]; then
+  GIT_BRANCH_STATUS=$(git rev-parse --abbrev-ref HEAD)
+else
+  GIT_BRANCH_STATUS=""
+fi
+
+export VIRTUAL_ENV_NAME=$VIRTUAL_ENV_NAME
+export VIRTUAL_ENV_IS_PROJECT=$VIRTUAL_ENV_IS_PROJECT
+export VIRTUAL_ENV_REL_PATH=$VIRTUAL_ENV_REL_PATH
+export GIT_BRANCH_STATUS=$GIT_BRANCH_STATUS
+
+set_term_var VIRTUAL_ENV_NAME $VIRTUAL_ENV_NAME
+set_term_var VIRTUAL_ENV_IS_PROJECT $VIRTUAL_ENV_IS_PROJECT
+set_term_var VIRTUAL_ENV_REL_PATH $VIRTUAL_ENV_REL_PATH
+set_term_var GIT_BRANCH_STATUS $GIT_BRANCH_STATUS

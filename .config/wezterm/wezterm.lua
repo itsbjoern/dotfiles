@@ -78,7 +78,6 @@ config.window_frame = {
 }
 
 config.window_decorations = "RESIZE"
-config.default_prog = { 'fish', '-l' }
 
 config.hide_tab_bar_if_only_one_tab = false
 config.tab_bar_at_bottom = true

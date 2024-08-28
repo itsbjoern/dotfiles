@@ -1,0 +1,7 @@
+#compdef mkvirtualenv
+
+PYTHONS=$(ls $HOMEBREW_PREFIX/bin | grep -E "^python[0-9]\.[0-9][0-9]?\$" | sort | uniq)
+# _arguments "-p[python version]:$PYTHONS" '--python[python version]' '--l[link project]' '-l[link project]'
+
+_arguments {-p,--python}"[python version]:python version:($PYTHONS)" \
+  {-l,--link}"[link dir]:directory:_files -/"

@@ -1,0 +1,12 @@
+if [[ $# -ne 1 ]]; then
+  echo "Usage: workon ENVNAME"
+  return 1
+fi
+
+local VENV="$WORKON_HOME/$1"
+if [[ ! -d $VENV ]]; then
+  echo "Virtualenv \"$1\" does not exist"
+  return 1
+fi
+
+source $VENV/bin/activate
