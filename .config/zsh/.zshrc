@@ -50,6 +50,7 @@ fi
 # zle -N my-backward-delete-word
 # bindkey '^[' my-backward-delete-word
 
+bindkey '^[[Z' reverse-menu-complete
 
 # Should be called before compinit
 zmodload zsh/complist
