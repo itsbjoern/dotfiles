@@ -194,6 +194,16 @@ config.mouse_bindings = {
     mods = 'CMD',
     action = wezterm.action.OpenLinkAtMouseCursor,
   },
+  {
+    event = { Drag = { streak = 1, button = 'Left' } },
+    mods = 'CTRL',
+    action = wezterm.action.StartWindowDrag,
+  },
+  {
+    event = { Drag = { streak = 1, button = 'Left' } },
+    mods = 'CMD',
+    action = wezterm.action.DisableDefaultAssignment,
+  },
 }
 
 
