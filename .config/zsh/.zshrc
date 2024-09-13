@@ -13,6 +13,7 @@ export PIP_VIRTUALVENV_STATUS=$WORKON_HOME
 export PIP_RESPECT_VIRTUALENV=true
 
 export HOMEBREW_PREFIX=$(brew --prefix)
+export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
