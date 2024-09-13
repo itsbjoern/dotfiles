@@ -2,4 +2,5 @@ __pycache__/
 *.pyc
 *.pyo
 .config/zsh/.zcompdump
+.config/zsh/.zsh_sessions
 .config/zsh/.zsh_history
