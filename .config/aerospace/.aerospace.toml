@@ -123,6 +123,9 @@ alt-shift-3 = 'workspace 3'
 alt-shift-4 = 'workspace 4'
 alt-shift-5 = 'workspace 5'
 
+alt-shift-a = 'workspace --wrap-around next'
+alt-shift-d = 'workspace --wrap-around prev'
+
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
 alt-ctrl-shift-1 = 'move-node-to-workspace 1'

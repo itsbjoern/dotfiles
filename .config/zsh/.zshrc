@@ -6,17 +6,19 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 export WORKON_HOME=$HOME/code
 export PYTHONWARNINGS="ignore"
 
+export DISABLE_AUTO_TITLE="true"
 
 # use the same directory for virtualenvs as virtualenvwrapper
 export PIP_VIRTUALVENV_STATUS=$WORKON_HOME
 # makes pip detect an active virtualenv and install to it
 export PIP_RESPECT_VIRTUALENV=true
 
-export HOMEBREW_PREFIX=$(brew --prefix)
+export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
+export HOMEBREW_PREFIX=$(brew --prefix)
 
 export HISTFILE="$ZDOTDIR/.zsh_history"
 
@@ -67,7 +69,18 @@ source ~/.config/zsh/completions.zsh
 source ~/.config/zsh/aliases/general.zsh
 source ~/.config/zsh/aliases/git.zsh
 
+function auto_title() {
+  TITLE="$VIRTUAL_ENV_REL_PATH"
+  if [[ -n "$VIRTUAL_ENV_NAME" ]]; then
+    TITLE="$TITLE ($VIRTUAL_ENV_NAME)"
+  fi
+
+  echo -en "\e]2;$TITLE\a"
+}
+
 precmd_functions+=(set_venv_vars)
+precmd_functions+=(auto_title)
+
 
 setopt HIST_SAVE_NO_DUPS
 setopt MENU_COMPLETE        # Automatically highlight first element of completion menu
