@@ -94,3 +94,6 @@ source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 
 
+
+# bun completions
+[ -s "/Users/personal/.bun/_bun" ] && source "/Users/personal/.bun/_bun"

@@ -10,7 +10,7 @@ zparseopts -D -F -K -- \
   {n,-env}:=arg_env ||
   return 1
 
-if [[ ${#arg_env} -ne 1 ]]; then
+if [[ ${#arg_env} -ne 2 ]]; then
   echo $usage
   return 1
 fi

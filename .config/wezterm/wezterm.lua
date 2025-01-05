@@ -214,7 +214,7 @@ config.keys = {
   {key="RightArrow", mods="OPT", action=wezterm.action{SendString="\x1bf"}},
 
   -- CTRL-SHIFT-l activates the debug overlay
-  { key = 'p', mods = 'CTRL', action = wezterm.action.ShowDebugOverlay },
+  { key = 'p', mods = 'CTRL|SHIFT', action = wezterm.action.ShowDebugOverlay },
 
    -- Vertical pipe (|) -> horizontal split
    {
