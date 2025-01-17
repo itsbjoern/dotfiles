@@ -13,6 +13,7 @@ export PIP_VIRTUALVENV_STATUS=$WORKON_HOME
 # makes pip detect an active virtualenv and install to it
 export PIP_RESPECT_VIRTUALENV=true
 
+export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
@@ -82,10 +83,15 @@ precmd_functions+=(set_venv_vars)
 precmd_functions+=(auto_title)
 
 
-setopt HIST_SAVE_NO_DUPS
 setopt MENU_COMPLETE        # Automatically highlight first element of completion menu
 setopt AUTO_LIST            # Automatically list choices on ambiguous completion.
 setopt COMPLETE_IN_WORD     # Complete from both ends of a word.
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_FIND_NO_DUPS
+setopt HIST_SAVE_NO_DUPS
 
 # https://github.com/zsh-users/zsh-autosuggestions/issues/515
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
