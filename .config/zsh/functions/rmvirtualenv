@@ -1,15 +1,24 @@
-if [[ $# -neq 1 ]]; then
-  echo "Usage: rmvirtualenv ENVNAME"
+local usage=(
+  "Usage: rmvirtualenv [-n|--env] ENVNAME"
+)
+
+zparseopts -D -F -K -- \
+  {n,-env}:=arg_env || return 1
+
+echo "$arg_env"
+if [[ ${#arg_env} -ne 2 ]]; then
+  echo $usage
   return 1
 fi
 
-local VENV="$WORKON_HOME/$1"
+local VENV="$WORKON_HOME/$arg_env[-1]"
 if [[ ! -d $VENV ]]; then
-  echo "Virtualenv \"$1\" does not exist"
+  echo "Virtualenv \"$arg_env[-1]\" does not exist"
   return 1
 fi
 
-read -p "Really delete \"$1\"? [y/N] " confirm
+printf "Really delete \"$arg_env[-1]\"? [y/N]"
+read confirm
 
 case $confirm in
   [yY])
@@ -23,3 +32,4 @@ if [[ -n "$VIRTUAL_ENV" ]]; then
 fi
 cd
 rm -rf $VENV
+

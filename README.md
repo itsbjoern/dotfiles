@@ -1,5 +1,11 @@
 # First Setup
 
+Set `.ssh/config` for ghostty support
+```
+Host *
+  SetEnv TERM=xterm-256color
+```
+
 ## Settings
 
 ### Keyboard -> Keyboard Shortcuts

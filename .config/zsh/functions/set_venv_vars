@@ -15,14 +15,14 @@ if [ -n "$VIRTUAL_ENV" ]; then
     fi
   fi
 
-  if [ ! "$VIRTUAL_ENV_SRC_FOLDER" = "$CURR_DIR" ]; then
+  if [ "$VIRTUAL_ENV_SRC_FOLDER" != "$CURR_DIR" ]; then
     VIRTUAL_ENV_REL_PATH="@/$(grealpath --relative-to=$VIRTUAL_ENV_SRC_FOLDER $CURR_DIR)"
   else
     VIRTUAL_ENV_REL_PATH="@"
   fi
 else
   VIRTUAL_ENV_NAME=""
-  if [ ! "$CURR_DIR" = "/Users/$USER" ]; then
+  if [ "$CURR_DIR" != "/Users/$USER" ]; then
     VIRTUAL_ENV_REL_PATH="~/$(grealpath --relative-to=/Users/$USER $CURR_DIR)"
   else
     VIRTUAL_ENV_REL_PATH="~"

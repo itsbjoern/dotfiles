@@ -5,8 +5,8 @@ local usage=(
 )
 
 zparseopts -D -F -K -- \
-  {p,-python}=flag_python \
-  {l,-link}=flag_link \
+  {p,-python}:=flag_python \
+  {l,-link}:=flag_link \
   {n,-env}:=arg_env ||
   return 1
 
@@ -23,13 +23,13 @@ fi
 
 PYTHON_BIN="$HOMEBREW_PREFIX/bin/python3"
 if [[ -n $flag_python ]]; then
-  PYTHON_BIN="$HOMEBREW_PREFIX/bin/$flag_python"
+  PYTHON_BIN="$HOMEBREW_PREFIX/bin/$flag_python[-1]"
 fi
 
 "$PYTHON_BIN" -m venv "$VENV" --upgrade-deps
 mkdir -p "$VENV/src"
 if [[ -n $flag_link ]]; then
-  echo "$(realpath $flag_link)" > "$VENV/.project"
+  echo "$(realpath $flag_link[-1])" > "$VENV/.project"
 fi
 
 source "$VENV/bin/activate"
