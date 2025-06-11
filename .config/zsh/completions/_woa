@@ -1,0 +1,4 @@
+#compdef woa
+
+VENVS=$(ls $WORKON_HOME | sort | uniq)
+_alternative "arguments:venvs:($VENVS)"
