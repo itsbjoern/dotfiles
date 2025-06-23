@@ -47,9 +47,8 @@ function diff() {
 }
 
 
-
 # Any additional user needs to be a sudo user as follow:
 # <user>        ALL = (<brewser>) NOPASSWD: /opt/homebrew/bin/brew
-alias brew='sudo -Hu '$brewser' brew'
+brewser=$(stat -f "%Su" $(which $HOMEBREW_PREFIX/bin/brew))
 unalias brew 2>/dev/null
-brewser=$(stat -f "%Su" $(which brew))
+alias brew='sudo -Hu '$brewser' brew'

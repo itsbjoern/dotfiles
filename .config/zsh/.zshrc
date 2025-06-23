@@ -13,13 +13,17 @@ export PIP_VIRTUALVENV_STATUS=$WORKON_HOME
 # makes pip detect an active virtualenv and install to it
 export PIP_RESPECT_VIRTUALENV=true
 
+export HOMEBREW_PREFIX="/opt/homebrew"
+export HOMEBREW_CELLAR="$HOMEBREW_PREFIX/Cellar"
+export HOMEBREW_REPOSITORY="$HOMEBREW_PREFIX"
+export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
+
+
 export ANDROID_HOME="$HOME/Library/Android/sdk"
-export PATH="/opt/homebrew/bin:$PATH"
 export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
-export HOMEBREW_PREFIX=$(brew --prefix)
 
 export HISTFILE="$ZDOTDIR/.zsh_history"
 
@@ -97,8 +101,6 @@ setopt HIST_SAVE_NO_DUPS
 export ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=4"
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
-
-
 
 
 # bun completions
