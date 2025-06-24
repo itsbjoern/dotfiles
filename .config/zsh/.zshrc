@@ -25,8 +25,6 @@ export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
 
-export HISTFILE="$ZDOTDIR/.zsh_history"
-
 # pnpm
 export PNPM_HOME="/Users/$USER/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
@@ -86,14 +84,21 @@ function auto_title() {
 precmd_functions+=(set_venv_vars)
 precmd_functions+=(auto_title)
 
+export HISTFILE="$ZDOTDIR/.zsh_history"
+export HISTSIZE=100000
+export SAVEHIST=100000
 
 setopt MENU_COMPLETE        # Automatically highlight first element of completion menu
 setopt AUTO_LIST            # Automatically list choices on ambiguous completion.
 setopt COMPLETE_IN_WORD     # Complete from both ends of a word.
+setopt APPEND_HISTORY
+setopt SHARE_HISTORY
+setopt HIST_VERIFY
 setopt HIST_EXPIRE_DUPS_FIRST
 setopt HIST_IGNORE_DUPS
 setopt HIST_IGNORE_ALL_DUPS
 setopt HIST_IGNORE_SPACE
+setopt HIST_REDUCE_BLANKS
 setopt HIST_FIND_NO_DUPS
 setopt HIST_SAVE_NO_DUPS
 
