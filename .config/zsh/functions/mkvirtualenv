@@ -26,7 +26,7 @@ if [[ -n $flag_python ]]; then
   PYTHON_BIN="$HOMEBREW_PREFIX/bin/$flag_python[-1]"
 fi
 
-"$PYTHON_BIN" -m venv "$VENV" --upgrade-deps
+"$PYTHON_BIN" -m venv "$VENV" --upgrade-deps --prompt $arg_env[-1]
 mkdir -p "$VENV/src"
 if [[ -n $flag_link ]]; then
   echo "$(realpath $flag_link[-1])" > "$VENV/.project"
