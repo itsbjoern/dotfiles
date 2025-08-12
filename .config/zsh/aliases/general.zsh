@@ -48,4 +48,4 @@ function diff() {
 
 
 # Any additional user needs to be a sudo user as follow:
-# <user>        ALL = (<brewser>) NOPASSWD: /opt/homebrew/bin/brew
+# <user>        ALL = (<user>) NOPASSWD: /opt/homebrew/bin/brew, /usr/sbin/installer, /bin/launchctl
