@@ -22,8 +22,12 @@ export PATH="$HOMEBREW_PREFIX/bin:$HOMEBREW_PREFIX/sbin:$PATH"
 export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
-export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:/Applications/Cursor.app/Contents/Resources/app/bin"
+export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
+
+alias code="cursor"
 
 # pnpm
 export PNPM_HOME="/Users/$USER/Library/pnpm"
