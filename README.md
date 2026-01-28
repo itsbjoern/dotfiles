@@ -10,12 +10,6 @@ Host *
 
 ### Keyboard -> Keyboard Shortcuts
 
-Mission Control
-* Uncheck "Mission Control"
-* Uncheck "Application Windows"
-* Uncheck "Mission Control -> Move left a space"
-* Uncheck "Mission Control -> Move right a space"
-
 Spotlight
 * Change "Show Spotlight Search" to Alt+Space
 
@@ -28,3 +22,8 @@ If brew is installed as specific user, add the following line to sudoers (visudo
 ```
 bjoern          ALL = (bjoern) NOPASSWD: /opt/homebrew/bin/brew, /usr/sbin/installer
 ```
+
+## Other
+
+Enabled TouchID for sudo:
+`cd /etc/pam.d/` then add the line `auth sufficient pam_tid.so`

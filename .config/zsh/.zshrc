@@ -27,12 +27,17 @@ export PATH="$PATH:/Applications/Cursor.app/Contents/Resources/app/bin"
 export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
 
-alias code="cursor"
+# bun
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$BUN_INSTALL/bin:$PATH"
+# bun end
 
 # pnpm
 export PNPM_HOME="/Users/$USER/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 # pnpm end
+
+alias code="cursor"
 
 # Track interactions of TMUX panes and update SSH_AUTH_SOCK
 _update_ssh_agent() {
