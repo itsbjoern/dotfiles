@@ -6,3 +6,5 @@ shell-integration-features = no-title
 keybind = global:ctrl+grave_accent=toggle_quick_terminal
 keybind = super+f=write_scrollback_file:open
 keybind = shift+enter=text:\n
+
+keybind = ctrl+z=ignore

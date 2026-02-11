@@ -1,6 +1,0 @@
-auto-update = check
-font-family = Menlo
-shell-integration = zsh
-shell-integration-features = no-title
-
-keybind = global:ctrl+grave_accent=toggle_quick_terminal
