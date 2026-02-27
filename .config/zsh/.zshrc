@@ -23,6 +23,7 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$PATH:/Applications/Cursor.app/Contents/Resources/app/bin"
 export PATH="$HOMEBREW_PREFIX/opt/openjdk/bin:$PATH"
 export PATH="$HOMEBREW_PREFIX/opt/python/libexec/bin:/usr/local/sbin:$PATH"
@@ -36,8 +37,6 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 export PNPM_HOME="/Users/$USER/Library/pnpm"
 export PATH="$PNPM_HOME:$PATH"
 # pnpm end
-
-alias code="cursor"
 
 # Track interactions of TMUX panes and update SSH_AUTH_SOCK
 _update_ssh_agent() {
