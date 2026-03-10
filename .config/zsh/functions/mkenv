@@ -1,0 +1,40 @@
+mkenv() {
+  local name=""
+  local link_target=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --link)
+        shift
+        link_target="$1"
+        ;;
+      *)
+        name="$1"
+        ;;
+    esac
+    shift
+  done
+
+  if [[ -z "$name" ]]; then
+    echo "Usage: mkenv ENVNAME [--link /absolute/target/path]" >&2
+    return 1
+  fi
+
+  if [[ -n "$link_target" ]]; then
+    if [[ "$link_target" != /* ]]; then
+      link_target="$PWD/$link_target"
+    fi
+    if [[ ! -d "$link_target" ]]; then
+      echo "Link target '$link_target' does not exist or is not a directory" >&2
+      return 1
+    fi
+    _env_registry_update "$name" "$link_target"
+    echo "Linked env '$name' -> '$link_target'"
+    return 0
+  fi
+
+  local root="$WORKON_HOME/$name"
+  mkdir -p -- "$root/src"
+  echo "Created env '$name' at '$root/src'"
+}
+

@@ -1,0 +1,12 @@
+#compdef uvc
+
+_uvc() {
+  if (( $+functions[_uv] )); then
+    _uv "$@"
+  else
+    _arguments '*::args:_files'
+  fi
+}
+
+_uvc "$@"
+

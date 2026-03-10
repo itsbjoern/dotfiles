@@ -1,0 +1,32 @@
+a() {
+  if [[ -n "$ENV_TARGET" && -d "$ENV_TARGET" ]]; then
+    cd "$ENV_TARGET"
+    return 0
+  fi
+
+  if [[ -n "$ENV_NAME" ]]; then
+    _env_resolve "$ENV_NAME" || return 1
+    if [[ -d "$ENV_TARGET" ]]; then
+      cd "$ENV_TARGET"
+      return 0
+    fi
+  fi
+
+  if [[ -z "$VIRTUAL_ENV" ]]; then
+    echo "no active environment" >&2
+    return 1
+  fi
+
+  if [[ ! -d "$VIRTUAL_ENV/src" ]]; then
+    mkdir -p "$VIRTUAL_ENV/src"
+  fi
+
+  local VENV_STATUS
+  VENV_STATUS="${VIRTUAL_ENV:t}"
+  if [[ -d "$VIRTUAL_ENV/src/$VENV_STATUS" ]]; then
+    cd "$VIRTUAL_ENV/src/$VENV_STATUS"
+  else
+    cd "$VIRTUAL_ENV/src"
+  fi
+}
+

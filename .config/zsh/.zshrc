@@ -75,15 +75,16 @@ autoload -Uz $fpath[2]/*(.:t)
 autoload -Uz compinit; compinit
 _comp_options+=(globdots) # With hidden files
 
+source ~/.config/zsh/envs.zsh
 source ~/.config/zsh/set-term-var.zsh
 source ~/.config/zsh/completions.zsh
 source ~/.config/zsh/aliases/general.zsh
 source ~/.config/zsh/aliases/git.zsh
 
 function auto_title() {
-  TITLE="$VIRTUAL_ENV_REL_PATH"
-  if [[ -n "$VIRTUAL_ENV_NAME" ]]; then
-    TITLE="$TITLE ($VIRTUAL_ENV_NAME)"
+  TITLE="$ENV_REL_PATH"
+  if [[ -n "$ENV_NAME" ]]; then
+    TITLE="$TITLE ($ENV_NAME)"
   fi
 
   echo -en "\e]2;$TITLE\a"
@@ -116,10 +117,8 @@ export ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=4"
 source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 
-# bun completions
-[ -s "/Users/personal/.bun/_bun" ] && source "/Users/personal/.bun/_bun"
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/bjoern/.docker/completions $fpath)
+fpath=($HOME/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions

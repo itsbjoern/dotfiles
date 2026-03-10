@@ -1,0 +1,47 @@
+uvc() {
+  local root=""
+
+  if [[ -n "$ENV_TARGET" && -d "$ENV_TARGET" ]]; then
+    root="$ENV_TARGET"
+  elif [[ -n "$ENV_NAME" ]]; then
+    _env_resolve "$ENV_NAME" || return 1
+    if [[ -d "$ENV_TARGET" ]]; then
+      root="$ENV_TARGET"
+    fi
+  fi
+
+  if [[ -z "$root" ]]; then
+    if [[ -n "$VIRTUAL_ENV" && -d "$VIRTUAL_ENV" ]]; then
+      root="$VIRTUAL_ENV"
+
+      local name="${root:t}"
+      if [[ -d "$root/src/$name" ]]; then
+        root="$root/src/$name"
+      elif [[ -d "$root/src" ]]; then
+        root="$root/src"
+      fi
+    fi
+  fi
+
+  if [[ -z "$root" ]]; then
+    echo "uvc: no active environment (use wo ENVNAME first)" >&2
+    return 1
+  fi
+
+  local venv_dir="$root/.venv"
+  if [[ -d "$venv_dir" ]]; then
+    echo "uvc: virtual env already exists at '$venv_dir'"
+  else
+    echo "uvc: creating virtual env at '$venv_dir' with uv..."
+    (cd "$root" && uv venv .venv)
+  fi
+
+  if [[ -f "$venv_dir/bin/activate" ]]; then
+    if [[ -n "$VIRTUAL_ENV" && "$VIRTUAL_ENV" != "$venv_dir" ]]; then
+      command deactivate 2>/dev/null || true
+    fi
+    source "$venv_dir/bin/activate"
+    _env_wrap_deactivate
+  fi
+}
+

@@ -1,0 +1,56 @@
+rmenv() {
+  local name="$1"
+  if [[ -z "$name" ]]; then
+    echo "Usage: rmenv ENVNAME" >&2
+    return 1
+  fi
+
+  local root="$WORKON_HOME/$name"
+  local has_dir=0
+  local has_mapping=0
+
+  if [[ -d "$root" ]]; then
+    has_dir=1
+  fi
+
+  if [[ -f "$ENV_REGISTRY_FILE" ]]; then
+    if grep -qE "^${name}=" "$ENV_REGISTRY_FILE"; then
+      has_mapping=1
+    fi
+  fi
+
+  if (( ! has_dir && ! has_mapping )); then
+    echo "Env '$name' not found (no directory under $WORKON_HOME and no link entry in $ENV_REGISTRY_FILE)" >&2
+    return 1
+  fi
+
+  local what="link"
+  if (( has_dir && has_mapping )); then
+    what="directory and link"
+  elif (( has_dir )); then
+    what="directory"
+  fi
+
+  printf "Really remove env '%s' (%s)? [y/N] " "$name" "$what"
+  local reply
+  read -r reply
+  if [[ "$reply" != [Yy]* ]]; then
+    echo "Aborted removal of env '$name'"
+    return 1
+  fi
+
+  if [[ "$ENV_NAME" == "$name" ]]; then
+    deactivate 2>/dev/null || true
+  fi
+
+  if (( has_mapping )); then
+    _env_registry_remove "$name" >/dev/null 2>&1
+    echo "Removed link for env '$name' from $ENV_REGISTRY_FILE"
+  fi
+
+  if (( has_dir )); then
+    rm -rf -- "$root"
+    echo "Removed env directory '$root'"
+  fi
+}
+

@@ -1,0 +1,28 @@
+#compdef wo woa
+
+local -a envs
+local base="${WORKON_HOME:-$HOME/code}"
+
+if [[ -d "$base" ]]; then
+  local d
+  for d in "$base"/*(/N); do
+    if [[ -d "$d/src" ]]; then
+      envs+="${d:t}"
+    fi
+  done
+fi
+
+local registry="$base/.envs"
+if [[ -f "$registry" ]]; then
+  local line name
+  while IFS= read -r line; do
+    [[ -z "$line" ]] && continue
+    [[ "$line" == \#* ]] && continue
+    name="${line%%=*}"
+    [[ -n "$name" ]] && envs+="$name"
+  done <"$registry"
+fi
+
+envs=(${(u)envs})
+_alternative "arguments:envs:(${envs})"
+

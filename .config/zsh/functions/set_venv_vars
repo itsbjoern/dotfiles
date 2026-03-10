@@ -1,47 +1,72 @@
 CURR_DIR=$(pwd)
 
-if [ -n "$VIRTUAL_ENV" ]; then
-  VIRTUAL_ENV_REL_PATH=""
-  VIRTUAL_ENV_IS_PROJECT="false"
-  VIRTUAL_ENV_NAME=`basename "$VIRTUAL_ENV"`
-  VIRTUAL_ENV_SRC_FOLDER="$VIRTUAL_ENV/src"
+ENV_NAME_VAR=""
+ENV_REL_PATH=""
+ENV_IS_PROJECT="false"
 
-  if [ -f "$VIRTUAL_ENV/.project" ]; then
-    VIRTUAL_ENV_SRC_FOLDER=`cat "$VIRTUAL_ENV/.project"`
-    VIRTUAL_ENV_IS_PROJECT="true"
+# Prefer new env model (ENV_TARGET / ENV_NAME) when available
+if [[ -n "$ENV_TARGET" && -d "$ENV_TARGET" ]]; then
+  ENV_IS_PROJECT="true"
+
+  local root="$ENV_TARGET"
+  local name
+  if [[ -n "$ENV_NAME" ]]; then
+    name="$ENV_NAME"
   else
-    if [ -d "$VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME" ]; then
-      VIRTUAL_ENV_SRC_FOLDER="$VIRTUAL_ENV_SRC_FOLDER/$VIRTUAL_ENV_NAME"
-    fi
+    name="${root:t}"
   fi
 
-  if [ "$VIRTUAL_ENV_SRC_FOLDER" != "$CURR_DIR" ]; then
-    VIRTUAL_ENV_REL_PATH="@/$(grealpath --relative-to=$VIRTUAL_ENV_SRC_FOLDER $CURR_DIR)"
+  if [[ "$root" != "$CURR_DIR" ]]; then
+    ENV_REL_PATH="@/$(grealpath --relative-to="$root" "$CURR_DIR")"
   else
-    VIRTUAL_ENV_REL_PATH="@"
+    ENV_REL_PATH="@"
   fi
+
+  ENV_NAME_VAR="$name"
+
+elif [[ -n "$VIRTUAL_ENV" ]]; then
+  # Fallback for legacy/global virtualenvs
+  ENV_IS_PROJECT="true"
+
+  local root="$VIRTUAL_ENV"
+  local name="${root:t}"
+  if [[ -d "$root/src/$name" ]]; then
+    root="$root/src/$name"
+  elif [[ -d "$root/src" ]]; then
+    root="$root/src"
+  fi
+
+  if [[ "$root" != "$CURR_DIR" ]]; then
+    ENV_REL_PATH="@/$(grealpath --relative-to="$root" "$CURR_DIR")"
+  else
+    ENV_REL_PATH="@"
+  fi
+
+  ENV_NAME_VAR="$name"
 else
-  VIRTUAL_ENV_NAME=""
-  if [ "$CURR_DIR" != "/Users/$USER" ]; then
-    VIRTUAL_ENV_REL_PATH="~/$(grealpath --relative-to=/Users/$USER $CURR_DIR)"
+  # No active env; show path relative to home
+  if [[ "$CURR_DIR" != "$HOME" ]]; then
+    ENV_REL_PATH="~/$(grealpath --relative-to="$HOME" "$CURR_DIR")"
   else
-    VIRTUAL_ENV_REL_PATH="~"
+    ENV_REL_PATH="~"
   fi
 fi
 
 IS_IN_GIT=$(git rev-parse --is-inside-work-tree 2> /dev/null)
-if [ "$IS_IN_GIT" = "true" ]; then
+if [[ "$IS_IN_GIT" = "true" ]]; then
   GIT_BRANCH_STATUS=$(git rev-parse --abbrev-ref HEAD)
 else
   GIT_BRANCH_STATUS=""
 fi
 
-export VIRTUAL_ENV_NAME=$VIRTUAL_ENV_NAME
-export VIRTUAL_ENV_IS_PROJECT=$VIRTUAL_ENV_IS_PROJECT
-export VIRTUAL_ENV_REL_PATH=$VIRTUAL_ENV_REL_PATH
-export GIT_BRANCH_STATUS=$GIT_BRANCH_STATUS
+ENV_NAME="$ENV_NAME_VAR"
 
-set_term_var VIRTUAL_ENV_NAME $VIRTUAL_ENV_NAME
-set_term_var VIRTUAL_ENV_IS_PROJECT $VIRTUAL_ENV_IS_PROJECT
-set_term_var VIRTUAL_ENV_REL_PATH $VIRTUAL_ENV_REL_PATH
-set_term_var GIT_BRANCH_STATUS $GIT_BRANCH_STATUS
+export ENV_NAME
+export ENV_IS_PROJECT
+export ENV_REL_PATH
+export GIT_BRANCH_STATUS
+
+set_term_var ENV_NAME "$ENV_NAME"
+set_term_var ENV_IS_PROJECT "$ENV_IS_PROJECT"
+set_term_var ENV_REL_PATH "$ENV_REL_PATH"
+set_term_var GIT_BRANCH_STATUS "$GIT_BRANCH_STATUS"

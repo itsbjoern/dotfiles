@@ -1,0 +1,147 @@
+uvi() {
+  local root=""
+
+  if [[ -n "$ENV_TARGET" && -d "$ENV_TARGET" ]]; then
+    root="$ENV_TARGET"
+  elif [[ -n "$ENV_NAME" ]]; then
+    _env_resolve "$ENV_NAME" || return 1
+    if [[ -d "$ENV_TARGET" ]]; then
+      root="$ENV_TARGET"
+    fi
+  fi
+
+  if [[ -z "$root" ]]; then
+    if [[ -n "$VIRTUAL_ENV" && -d "$VIRTUAL_ENV" ]]; then
+      root="$VIRTUAL_ENV"
+
+      local name="${root:t}"
+      if [[ -d "$root/src/$name" ]]; then
+        root="$root/src/$name"
+      elif [[ -d "$root/src" ]]; then
+        root="$root/src"
+      fi
+    fi
+  fi
+
+  if [[ -z "$root" ]]; then
+    echo "uvi: no active environment (use wo ENVNAME first)" >&2
+    return 1
+  fi
+
+  local has_manifest=0
+  if [[ -f "$root/uv.lock" || -f "$root/poetry.lock" || -f "$root/requirements.txt" ]]; then
+    has_manifest=1
+  fi
+
+  if (( has_manifest )); then
+    # Ensure a .venv exists for installs; delegate to uvc for creation logic.
+    local save_env_target="$ENV_TARGET"
+    ENV_TARGET="$root"
+    uvc || {
+      ENV_TARGET="$save_env_target"
+      echo "uvi: failed to ensure .venv in '$root' via uvc" >&2
+      return 1
+    }
+    ENV_TARGET="$save_env_target"
+  fi
+
+  if [[ -f "$root/uv.lock" ]]; then
+    echo "uvi: detected uv.lock, running 'uv sync' in '$root'"
+    (cd "$root" && uv sync)
+    return $?
+  elif [[ -f "$root/poetry.lock" ]]; then
+    echo "uvi: detected poetry.lock, naively parsing into requirements and installing via 'uv pip' in '$root'"
+    (
+      cd "$root" || return 1
+      python - <<'PY' | uv pip install --no-deps -r -
+import os, sys, re
+from pathlib import Path
+
+path = Path("poetry.lock")
+try:
+    text = path.read_text(encoding="utf-8")
+except OSError as e:
+    print(f"# uvi: failed to read poetry.lock: {e}", file=sys.stderr)
+    sys.exit(1)
+
+env_name = os.environ.get("ENV_NAME")
+
+name = None
+version = None
+category = None
+source_type = None
+source_url = None
+seen = set()
+lines_out = []
+
+def flush():
+    global name, version, category, source_type, source_url
+    if not (name and version):
+        return
+    # Skip the root package that matches the active env/project name.
+    if env_name and name == env_name:
+        return
+    # Directory sources should be installed from their path instead of PyPI.
+    if source_type == "directory" and source_url:
+        line = source_url
+    else:
+        line = f"{name}=={version}"
+    key = (line, category)
+    if key in seen:
+        return
+    seen.add(key)
+    lines_out.append(line)
+
+in_source = False
+
+for line in text.splitlines():
+    raw = line
+    line = line.strip()
+    if line == "[[package]]":
+        flush()
+        name = version = category = source_type = source_url = None
+        in_source = False
+        continue
+    if line == "[package.source]":
+        in_source = True
+        continue
+    if line.startswith("[") and line != "[package.source]":
+        in_source = False
+    if line.startswith("name ="):
+        m = re.search(r'"([^"]+)"', line)
+        if m:
+            name = m.group(1)
+    elif line.startswith("version ="):
+        m = re.search(r'"([^"]+)"', line)
+        if m:
+            version = m.group(1)
+    elif line.startswith("category ="):
+        m = re.search(r'"([^"]+)"', line)
+        if m:
+            category = m.group(1)
+    elif in_source and line.startswith("type ="):
+        m = re.search(r'"([^"]+)"', line)
+        if m:
+            source_type = m.group(1)
+    elif in_source and line.startswith("url ="):
+        m = re.search(r'"([^"]+)"', line)
+        if m:
+            source_url = m.group(1)
+
+flush()
+
+for ln in sorted(set(lines_out)):
+    print(ln)
+PY
+    )
+    return $?
+  elif [[ -f "$root/requirements.txt" ]]; then
+    echo "uvi: detected requirements.txt, running 'uv pip install -r requirements.txt' in '$root'"
+    (cd "$root" && uv pip install -r requirements.txt)
+    return $?
+  else
+    echo "uvi: no uv.lock, poetry.lock, or requirements.txt found under '$root'" >&2
+    return 1
+  fi
+}
+

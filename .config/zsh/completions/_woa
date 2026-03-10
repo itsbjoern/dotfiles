@@ -1,4 +1,11 @@
 #compdef woa
 
+_woa() {
+  # Delegate completion to the shared wo/woa completer
+  _wo "$@"
+}
+
+#compdef woa
+
 VENVS=$(ls $WORKON_HOME | sort | uniq)
 _alternative "arguments:venvs:($VENVS)"

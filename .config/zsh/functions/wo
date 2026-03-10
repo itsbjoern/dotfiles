@@ -1,0 +1,30 @@
+wo() {
+  local name="$1"
+  if [[ -z "$name" ]]; then
+    echo "Usage: wo ENVNAME" >&2
+    return 1
+  fi
+
+  _env_resolve "$name" || return 1
+
+  if [[ ! -d "$ENV_TARGET" ]]; then
+    echo "Env '$name' target '$ENV_TARGET' does not exist" >&2
+    return 1
+  fi
+
+  export ENV_NAME ENV_ROOT ENV_TARGET
+
+  local venv_dir="$ENV_TARGET/.venv"
+  if [[ -d "$venv_dir" ]]; then
+    if [[ -n "$VIRTUAL_ENV" ]]; then
+      command deactivate 2>/dev/null || true
+    fi
+    if [[ -f "$venv_dir/bin/activate" ]]; then
+      source "$venv_dir/bin/activate"
+      _env_wrap_deactivate
+    else
+      echo "No activate script at '$venv_dir/bin/activate'" >&2
+    fi
+  fi
+}
+

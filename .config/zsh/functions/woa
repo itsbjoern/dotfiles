@@ -1,0 +1,9 @@
+woa() {
+  if [[ -z "$1" ]]; then
+    echo "Usage: woa ENVNAME" >&2
+    return 1
+  fi
+  wo "$1" || return $?
+  a
+}
+
