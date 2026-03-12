@@ -1,0 +1,115 @@
+pullwt() {
+  local branch="$1"
+
+  if [[ -z "$branch" ]]; then
+    echo "Usage: pullwt BRANCH" >&2
+    return 1
+  fi
+
+  # Ensure we are inside a git worktree.
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "pullwt: not inside a git repository" >&2
+    return 1
+  fi
+
+  local dest_root
+  dest_root="$(git rev-parse --show-toplevel)" || return 1
+
+  # Require a completely clean destination worktree (tracked + untracked).
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "pullwt: destination worktree is not clean (commit, stash, or clean it first)" >&2
+    return 1
+  fi
+
+  # Locate the source worktree by branch name.
+  local source_root
+  source_root="$(git worktree list --porcelain 2>/dev/null | \
+    awk -v b="$branch" '
+      $1=="worktree" { path=$2 }
+      $1=="branch" && $2=="refs/heads/" b { print path }
+    ' | head -n 1)"
+
+  if [[ -z "$source_root" ]]; then
+    echo "pullwt: no worktree found for branch '$branch'" >&2
+    return 1
+  fi
+
+  if [[ "$source_root" == "$dest_root" ]]; then
+    echo "pullwt: source and destination worktrees are the same" >&2
+    return 1
+  fi
+
+  # Find the exact commit the source worktree is at and check that commit out
+  # (detached) in the destination, so committed changes match exactly.
+  local head_commit
+  head_commit="$(git -C "$source_root" rev-parse HEAD 2>/dev/null)" || {
+    echo "pullwt: failed to resolve HEAD in source worktree" >&2
+    return 1
+  }
+
+  if ! git -C "$dest_root" checkout --detach "$head_commit" >/dev/null 2>&1; then
+    echo "pullwt: failed to checkout commit '$head_commit' in destination" >&2
+    return 1
+  fi
+
+  # Collect tracked changes in the source worktree relative to HEAD (both
+  # staged and unstaged).
+  local tracked_changes
+  tracked_changes="$(git -C "$source_root" diff --name-status HEAD)" || return 1
+
+  # Collect untracked (non-ignored) files in the source worktree.
+  local untracked_files
+  # Use the second column from porcelain output to avoid carrying the '?? ' prefix.
+  untracked_files="$(git -C "$source_root" status --porcelain | awk '$1=="??"{print $2}')" || return 1
+
+  # Use rsync to copy only the changed files listed, letting rsync handle
+  # directory creation and metadata. We still handle deletions explicitly.
+  if ! command -v rsync >/dev/null 2>&1; then
+    echo "pullwt: rsync is not installed or not on PATH" >&2
+    return 1
+  fi
+
+  local rsync_list
+  rsync_list="$(mktemp "${TMPDIR:-/tmp}/pullwt.XXXXXX")" || return 1
+
+  # Apply tracked changes into the destination and build list of files to sync.
+  local st file old new
+  while IFS=$'\t' read -r st file new; do
+    [[ -z "$st" ]] && continue
+
+    case "$st" in
+      M|A)
+        printf '%s\n' "$file" >>"$rsync_list"
+        ;;
+      D)
+        rm -f "$dest_root/$file"
+        ;;
+      R*)
+        old="$file"
+        new="$new"
+        rm -f "$dest_root/$old"
+        printf '%s\n' "$new" >>"$rsync_list"
+        ;;
+      *)
+        # Fallback: for any unknown status, just copy the path if it exists.
+        if [[ -n "$file" && -f "$source_root/$file" ]]; then
+          printf '%s\n' "$file" >>"$rsync_list"
+        fi
+        ;;
+    esac
+  done <<< "$tracked_changes"
+
+  # Add untracked files to the rsync file list (respecting .gitignore via porcelain).
+  local rel
+  while IFS= read -r rel; do
+    [[ -z "$rel" ]] && continue
+    printf '%s\n' "$rel" >>"$rsync_list"
+  done <<< "$untracked_files"
+
+  # Run rsync once with the collected file list.
+  rsync -a --files-from="$rsync_list" "$source_root"/ "$dest_root"/
+
+  rm -f "$rsync_list"
+}
+
+
