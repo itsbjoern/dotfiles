@@ -83,7 +83,7 @@ def flush():
         return
     # Directory sources should be installed from their path instead of PyPI.
     if source_type == "directory" and source_url:
-        line = source_url
+        line = f"-e {source_url}"
     else:
         line = f"{name}=={version}"
     key = (line, category)
