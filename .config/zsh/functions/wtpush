@@ -1,0 +1,53 @@
+wtpush() {
+  local branch="$1"
+
+  if [[ -z "$branch" ]]; then
+    echo "Usage: wtpush BRANCH" >&2
+    return 1
+  fi
+
+  if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "wtpush: not inside a git repository" >&2
+    return 1
+  fi
+
+  local src_root dest_root
+  dest_root="$(git rev-parse --show-toplevel)" || return 1
+
+  # Locate the target worktree (the one we want to sync back to) by branch name.
+  src_root="$(git worktree list --porcelain 2>/dev/null | \
+    awk -v b="$branch" '
+      $1=="worktree" { path=$2 }
+      $1=="branch" && $2=="refs/heads/" b { print path }
+    ' | head -n 1)"
+
+  if [[ -z "$src_root" ]]; then
+    echo "wtpush: no worktree found for branch '$branch'" >&2
+    return 1
+  fi
+
+  if [[ "$src_root" == "$dest_root" ]]; then
+    echo "wtpush: source worktree and current repo are the same" >&2
+    return 1
+  fi
+
+  if ! command -v rsync >/dev/null 2>&1; then
+    echo "wtpush: rsync is not installed or not on PATH" >&2
+    return 1
+  fi
+
+  # One-way sync: make the target worktree match the current working tree.
+  # - Copies all current files from dest_root to src_root
+  # - Deletes files in src_root that no longer exist in dest_root
+  # - Skips git metadata.
+  rsync -a --delete \
+    --exclude='.git' \
+    --exclude='.venv' \
+    --exclude='.context' \
+    --exclude='node_modules' \
+    --exclude='__pycache__' \
+    --exclude='packages/mobile/ios' \
+    --exclude='packages/mobile/android' \
+    "$dest_root"/ "$src_root"/
+}
+

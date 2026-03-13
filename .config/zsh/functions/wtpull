@@ -1,14 +1,14 @@
-pullwt() {
+wtpull() {
   local branch="$1"
 
   if [[ -z "$branch" ]]; then
-    echo "Usage: pullwt BRANCH" >&2
+    echo "Usage: wtpull BRANCH" >&2
     return 1
   fi
 
   # Ensure we are inside a git worktree.
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    echo "pullwt: not inside a git repository" >&2
+    echo "wtpull: not inside a git repository" >&2
     return 1
   fi
 
@@ -17,7 +17,7 @@ pullwt() {
 
   # Require a completely clean destination worktree (tracked + untracked).
   if [[ -n "$(git status --porcelain)" ]]; then
-    echo "pullwt: destination worktree is not clean (commit, stash, or clean it first)" >&2
+    echo "wtpull: destination worktree is not clean (commit, stash, or clean it first)" >&2
     return 1
   fi
 
@@ -30,12 +30,12 @@ pullwt() {
     ' | head -n 1)"
 
   if [[ -z "$source_root" ]]; then
-    echo "pullwt: no worktree found for branch '$branch'" >&2
+    echo "wtpull: no worktree found for branch '$branch'" >&2
     return 1
   fi
 
   if [[ "$source_root" == "$dest_root" ]]; then
-    echo "pullwt: source and destination worktrees are the same" >&2
+    echo "wtpull: source and destination worktrees are the same" >&2
     return 1
   fi
 
@@ -43,12 +43,12 @@ pullwt() {
   # (detached) in the destination, so committed changes match exactly.
   local head_commit
   head_commit="$(git -C "$source_root" rev-parse HEAD 2>/dev/null)" || {
-    echo "pullwt: failed to resolve HEAD in source worktree" >&2
+    echo "wtpull: failed to resolve HEAD in source worktree" >&2
     return 1
   }
 
   if ! git -C "$dest_root" checkout --detach "$head_commit" >/dev/null 2>&1; then
-    echo "pullwt: failed to checkout commit '$head_commit' in destination" >&2
+    echo "wtpull: failed to checkout commit '$head_commit' in destination" >&2
     return 1
   fi
 
@@ -65,12 +65,12 @@ pullwt() {
   # Use rsync to copy only the changed files listed, letting rsync handle
   # directory creation and metadata. We still handle deletions explicitly.
   if ! command -v rsync >/dev/null 2>&1; then
-    echo "pullwt: rsync is not installed or not on PATH" >&2
+    echo "wtpull: rsync is not installed or not on PATH" >&2
     return 1
   fi
 
   local rsync_list
-  rsync_list="$(mktemp "${TMPDIR:-/tmp}/pullwt.XXXXXX")" || return 1
+  rsync_list="$(mktemp "${TMPDIR:-/tmp}/wtpull.XXXXXX")" || return 1
 
   # Apply tracked changes into the destination and build list of files to sync.
   local st file old new

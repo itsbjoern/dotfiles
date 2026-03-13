@@ -1,4 +1,4 @@
-cleanwt() {
+wtclean() {
   local force=0
 
   case "$1" in
@@ -14,12 +14,12 @@ cleanwt() {
   fi
 
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-    echo "cleanwt: not inside a git repository" >&2
+    echo "wtclean: not inside a git repository" >&2
     return 1
   fi
 
   if (( ! force )); then
-    echo "cleanwt: this will discard ALL tracked changes and remove untracked files (ignored files like .venv are kept)."
+    echo "wtclean: this will discard ALL tracked changes and remove untracked files (ignored files like .venv are kept)."
     printf "Continue? [y/N] "
     local reply
     read reply
@@ -27,7 +27,7 @@ cleanwt() {
       [Yy]*)
         ;;
       *)
-        echo "cleanwt: aborted" >&2
+        echo "wtclean: aborted" >&2
         return 1
         ;;
     esac
