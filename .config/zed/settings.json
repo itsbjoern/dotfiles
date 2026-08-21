@@ -1,0 +1,285 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "cli_default_open_behavior": "new_window",
+  "diff_view_style": "unified",
+  "gutter": {
+    "bookmarks": false,
+    "breakpoints": false,
+    "runnables": false,
+    "min_line_number_digits": 0
+  },
+  "agent_ui_font_size": 12.0,
+  "agent_buffer_font_size": 12.0,
+  "format_on_save": "on",
+  "ui_font_weight": 400.0,
+  "bottom_dock_layout": "contained",
+  "outline_panel": {
+    "default_width": 240,
+    "indent_size": 14.0,
+    "dock": "right"
+  },
+  "collaboration_panel": {
+    "button": false,
+    "dock": "right",
+    "default_width": 240
+  },
+  "git_panel": {
+    "dock": "right",
+    "default_width": 240
+  },
+  "project_panel": {
+    "hide_hidden": false,
+    "hide_root": true,
+    "dock": "right",
+    "auto_reveal_entries": false,
+    "default_width": 240
+  },
+  "agent": {
+    "thinking_display": "preview",
+    "tool_permissions": {
+      "default": "allow",
+      "tools": {
+        "terminal": {
+          "default": "allow"
+        }
+      }
+    },
+    "dock": "left",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+
+  "agent_servers": {
+    "cursor": {
+      "default_config_options": {
+        "mode": "agent"
+      },
+      "favorite_config_option_values": {
+        "model": ["default"]
+      },
+      "type": "registry"
+    }
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false,
+    "anthropic_retention": false
+  },
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "node": {
+    "npm_path": "pnpm"
+  },
+  "base_keymap": "VSCode",
+  "preview_tabs": {
+    "enabled": false,
+    "enable_preview_from_file_finder": false
+  },
+  "multi_cursor_modifier": "cmd_or_ctrl",
+  "use_smartcase_search": true,
+  "minimap": {
+    "show": "always",
+    "thumb": "always",
+    "max_width_columns": 60
+  },
+  "go_to_definition_fallback": "find_all_references",
+  "autosave": "on_focus_change",
+  "buffer_font_fallbacks": ["SF Mono", "Monaco", "Courier New", "monospace"],
+  "buffer_font_family": "Menlo",
+  "file_types": {
+    "javascriptreact": ["*.jsx"]
+  },
+  "show_whitespaces": "boundary",
+  "show_edit_predictions": true,
+  "soft_wrap": "editor_width",
+  "tab_size": 2,
+  "icon_theme": "Material Icon Theme",
+  "ui_font_size": 13.0,
+  "buffer_font_size": 11.0,
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "One Dark Pro"
+  },
+  "lsp": {
+    "oxlint": {
+      "initialization_options": {
+        "settings": {
+          "configPath": null,
+          "run": "onType",
+          "disableNestedConfig": false,
+          "fixKind": "safe_fix",
+          "unusedDisableDirectives": "deny"
+        }
+      }
+    },
+    "oxfmt": {
+      "initialization_options": {
+        "settings": {
+          "fmt.configPath": null,
+          "run": "onSave"
+        }
+      }
+    }
+  },
+  "languages": {
+    "Python": {
+      "language_servers": ["pyright", "ruff"],
+      "format_on_save": "on"
+    },
+    "CSS": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "HTML": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "JavaScript": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        },
+        {
+          "code_action": "source.fixAll.oxc"
+        }
+      ]
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "JSON5": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "JSONC": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "Markdown": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "MDX": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "TypeScript": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "TSX": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    },
+    "YAML": {
+      "format_on_save": "on",
+      "prettier": {
+        "allowed": false
+      },
+      "formatter": [
+        {
+          "language_server": {
+            "name": "oxfmt"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -6,3 +6,6 @@ __pycache__/
 .config/zsh/.zsh_history
 *.zcompdump*
 .config/ghostty/*.bak
+
+.config/karabiner/automatic_backups/
+.config/zed/prompts/
