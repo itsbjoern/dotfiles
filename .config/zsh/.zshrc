@@ -36,10 +36,6 @@ export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 # bun end
 
-# pnpm
-export PNPM_HOME="/Users/$USER/Library/pnpm"
-export PATH="$PNPM_HOME:$PATH"
-# pnpm end
 
 # Track interactions of TMUX panes and update SSH_AUTH_SOCK
 _update_ssh_agent() {
@@ -125,3 +121,11 @@ fpath=($HOME/.docker/completions $fpath)
 autoload -Uz compinit
 compinit
 # End of Docker CLI completions
+
+# pnpm
+export PNPM_HOME="/Users/bjoern/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME/bin:"*) ;;
+  *) export PATH="$PNPM_HOME/bin:$PATH" ;;
+esac
+# pnpm end

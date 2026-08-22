@@ -28,8 +28,30 @@ uvi() {
     return 1
   fi
 
+  local cwd_dir="$PWD"
+  local manifest_dir="$cwd_dir"
+  local manifest_type=""
+
+  # Prefer dependency manifests in the current working directory.
+  if [[ -f "$cwd_dir/uv.lock" ]]; then
+    manifest_type="uv"
+  elif [[ -f "$cwd_dir/poetry.lock" ]]; then
+    manifest_type="poetry"
+  elif [[ -f "$cwd_dir/requirements.txt" ]]; then
+    manifest_type="requirements"
+  elif [[ -f "$root/uv.lock" ]]; then
+    manifest_dir="$root"
+    manifest_type="uv"
+  elif [[ -f "$root/poetry.lock" ]]; then
+    manifest_dir="$root"
+    manifest_type="poetry"
+  elif [[ -f "$root/requirements.txt" ]]; then
+    manifest_dir="$root"
+    manifest_type="requirements"
+  fi
+
   local has_manifest=0
-  if [[ -f "$root/uv.lock" || -f "$root/poetry.lock" || -f "$root/requirements.txt" ]]; then
+  if [[ -n "$manifest_type" ]]; then
     has_manifest=1
   fi
 
@@ -45,14 +67,14 @@ uvi() {
     ENV_TARGET="$save_env_target"
   fi
 
-  if [[ -f "$root/uv.lock" ]]; then
-    echo "uvi: detected uv.lock, running 'uv sync' in '$root'"
-    (cd "$root" && uv sync)
+  if [[ "$manifest_type" == "uv" ]]; then
+    echo "uvi: detected uv.lock, running 'uv sync' in '$manifest_dir'"
+    (cd "$manifest_dir" && uv sync)
     return $?
-  elif [[ -f "$root/poetry.lock" ]]; then
-    echo "uvi: detected poetry.lock, naively parsing into requirements and installing via 'uv pip' in '$root'"
+  elif [[ "$manifest_type" == "poetry" ]]; then
+    echo "uvi: detected poetry.lock, naively parsing into requirements and installing via 'uv pip' in '$manifest_dir'"
     (
-      cd "$root" || return 1
+      cd "$manifest_dir" || return 1
       python - <<'PY' | uv pip install --no-deps -r -
 import os, sys, re
 from pathlib import Path
@@ -135,12 +157,12 @@ for ln in sorted(set(lines_out)):
 PY
     )
     return $?
-  elif [[ -f "$root/requirements.txt" ]]; then
-    echo "uvi: detected requirements.txt, running 'uv pip install -r requirements.txt' in '$root'"
-    (cd "$root" && uv pip install -r requirements.txt)
+  elif [[ "$manifest_type" == "requirements" ]]; then
+    echo "uvi: detected requirements.txt, running 'uv pip install -r requirements.txt' in '$manifest_dir'"
+    (cd "$manifest_dir" && uv pip install -r requirements.txt)
     return $?
   else
-    echo "uvi: no uv.lock, poetry.lock, or requirements.txt found under '$root'" >&2
+    echo "uvi: no uv.lock, poetry.lock, or requirements.txt found under '$cwd_dir' or '$root'" >&2
     return 1
   fi
 }
