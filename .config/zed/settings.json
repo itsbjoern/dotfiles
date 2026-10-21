@@ -7,6 +7,8 @@
 // custom settings, run `zed: open default settings` from the
 // command palette (cmd-shift-p / ctrl-shift-p)
 {
+  "ui_font_family": "Menlo",
+  "buffer_font_weight": 400.0,
   "cli_default_open_behavior": "new_window",
   "diff_view_style": "unified",
   "gutter": {
@@ -15,12 +17,14 @@
     "runnables": false,
     "min_line_number_digits": 0
   },
-  "agent_ui_font_size": 12.0,
-  "agent_buffer_font_size": 12.0,
+  "agent_ui_font_size": 13.0,
+  "agent_buffer_font_size": 13.0,
   "format_on_save": "on",
   "ui_font_weight": 400.0,
   "bottom_dock_layout": "contained",
   "outline_panel": {
+    "auto_reveal_entries": true,
+    "folder_indicator": "both",
     "default_width": 240,
     "indent_size": 14.0,
     "dock": "right"
@@ -42,6 +46,9 @@
     "default_width": 240
   },
   "agent": {
+    "sandbox_permissions": {
+      "allow_all_hosts": true
+    },
     "thinking_display": "preview",
     "tool_permissions": {
       "default": "allow",
@@ -90,6 +97,13 @@
     "thumb": "always",
     "max_width_columns": 60
   },
+  "file_scan_exclusions": [
+    "packages/mobile/src/assets/richtext-webview/index.html",
+    "**/*.lock",
+    "**/*.actrc",
+    "**/__pycache__/**",
+    "**/pnpm-lock.yaml"
+  ],
   "go_to_definition_fallback": "find_all_references",
   "autosave": "on_focus_change",
   "buffer_font_fallbacks": ["SF Mono", "Monaco", "Courier New", "monospace"],
@@ -103,13 +117,28 @@
   "tab_size": 2,
   "icon_theme": "Material Icon Theme",
   "ui_font_size": 13.0,
-  "buffer_font_size": 11.0,
+  "buffer_font_size": 12.0,
   "theme": {
     "mode": "dark",
     "light": "One Light",
     "dark": "One Dark Pro"
   },
   "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always"
+          }
+        },
+        "javascript": {
+          "updateImportsOnFileMove": {
+            "enabled": "always"
+          }
+        }
+      },
+      "enable_lsp_tasks": true
+    },
     "oxlint": {
       "initialization_options": {
         "settings": {

@@ -23,6 +23,7 @@ export ANDROID_HOME="$HOME/Library/Android/sdk"
 export PATH="/users/$USER/.cargo/bin:$PATH"
 export PATH="/usr/local/opt/node@16/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.docker/bin:$PATH"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$PATH:$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
@@ -117,9 +118,9 @@ source ~/.config/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=($HOME/.docker/completions $fpath)
+fpath=(/Users/bjoern/.docker/completions $fpath)
 autoload -Uz compinit
-compinit
+(( ${+_comps[docker]} )) || compinit
 # End of Docker CLI completions
 
 # pnpm

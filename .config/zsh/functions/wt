@@ -1,0 +1,496 @@
+# wt: host any branch or agent worktree in the main checkout, so long-running
+# dev servers there pick it up like a normal `git checkout`.
+# The body runs in a subshell so `exit` and the helpers stay out of the interactive shell.
+wt() (
+  emulate -L zsh
+  setopt pipe_fail no_unset extended_glob
+
+  TELEPORT_MSG="WIP: teleport"
+  LOCK_TAG="wt-parked"
+  US=$'\x1f'
+
+  die() { print -u2 "wt: $*"; exit 1 }
+  info() { print -- "$*" }
+
+  git_main() { git -C "$MAIN" "$@" }
+
+  init_repo() {
+    git rev-parse --git-dir >/dev/null 2>&1 || die "not inside a git repository"
+    MAIN="$(git worktree list --porcelain | awk 'NR==1 { print substr($0, 10); exit }')"
+    [[ -n "$MAIN" ]] || die "could not determine the main checkout"
+    COMMON="$(git -C "$MAIN" rev-parse --path-format=absolute --git-common-dir)"
+    STATE="$COMMON/wt"
+    JOURNAL="$STATE/journal"
+    mkdir -p "$STATE"
+    DEFAULT_BRANCH="$(git_main config --get wt.defaultBranch)"
+    if [[ -z "$DEFAULT_BRANCH" ]]; then
+      DEFAULT_BRANCH="$(git_main symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null)"
+      DEFAULT_BRANCH="${DEFAULT_BRANCH#origin/}"
+    fi
+    [[ -n "$DEFAULT_BRANCH" ]] || DEFAULT_BRANCH=development
+  }
+
+  current_branch() { git -C "$1" symbolic-ref --quiet --short HEAD 2>/dev/null }
+
+  is_dirty() { [[ -n "$(git -C "$1" status --porcelain 2>/dev/null)" ]] }
+
+  # Prints "path<TAB>branch<TAB>locked-reason" per worktree except main.
+  worktrees() {
+    git_main worktree list --porcelain | awk -v main="$MAIN" '
+      function flush() { if (p != "" && p != main) print p "\037" b "\037" l; p = b = l = "" }
+      /^worktree / { flush(); p = substr($0, 10) }
+      /^branch /   { b = substr($0, 8); sub(/^refs\/heads\//, "", b) }
+      /^locked/    { l = length($0) > 6 ? substr($0, 8) : "locked" }
+      END          { flush() }'
+  }
+
+  worktree_for_branch() {
+    local p b l
+    worktrees | while IFS=$US read -r p b l; do
+      [[ "$b" == "$1" ]] && { print -r -- "$p"; return }
+    done
+  }
+
+  worktree_by_name() {
+    local p b l
+    worktrees | while IFS=$US read -r p b l; do
+      [[ "${p:t}" == "$1" && -n "$b" && "$l" != $LOCK_TAG\ * ]] && { print -r -- "$p	$b"; return }
+    done
+  }
+
+  # Prints "branch<TAB>orig<TAB>park" for each parked worktree.
+  parked() {
+    local p b l rest
+    worktrees | while IFS=$US read -r p b l; do
+      [[ "$l" == $LOCK_TAG\ * ]] || continue
+      rest="${l#$LOCK_TAG }"
+      print -r -- "${rest%% *}$US${rest#* }$US$p"
+    done
+  }
+
+  park_changes() {
+    local dir="$1"
+    is_dirty "$dir" || return 0
+    current_branch "$dir" >/dev/null || die "$dir has uncommitted changes on a detached HEAD"
+    local amend=()
+    [[ "$(git -C "$dir" log -1 --format=%s)" == "$TELEPORT_MSG" ]] && amend=(--amend)
+    git -C "$dir" add -A || die "git add failed in $dir"
+    git -C "$dir" -c core.hooksPath=/dev/null -c commit.gpgsign=false \
+      commit -q --no-verify $amend -m "$TELEPORT_MSG" || die "teleport commit failed in $dir"
+  }
+
+  unpark_changes() {
+    local dir="$1"
+    [[ "$(git -C "$dir" log -1 --format=%s 2>/dev/null)" == "$TELEPORT_MSG" ]] || return 0
+    git -C "$dir" reset -q HEAD~1 || die "could not restore teleported changes in $dir"
+  }
+
+  self_and_ancestors() {
+    local p=$$
+    while [[ -n "$p" && "$p" -gt 1 ]]; do
+      print $p
+      p="$(ps -o ppid= -p $p 2>/dev/null | tr -d ' ')"
+    done
+  }
+
+  # Processes whose cwd is inside $1, ignoring Claude itself, idle shells and our own ancestry.
+  busy_processes() {
+    local root="${1:A}" pid comm cwd
+    local -a mine=($(self_and_ancestors))
+    lsof -a -d cwd -Fpcn 2>/dev/null | awk '
+      /^p/ { pid = substr($0, 2) } /^c/ { comm = substr($0, 2) }
+      /^n/ { print pid "\t" comm "\t" substr($0, 2) }' |
+    while IFS=$'\t' read -r pid comm cwd; do
+      [[ "$cwd" == "$root" || "$cwd" == "$root"/* ]] || continue
+      (( ${mine[(Ie)$pid]} )) && continue
+      [[ "$comm" == (claude|disclaimer) ]] && continue
+      [[ "${comm#-}" == (zsh|bash|sh|fish) ]] && ! pgrep -P "$pid" >/dev/null && continue
+      print -r -- "  $pid $comm (from $(ps -o comm= -p "$(ps -o ppid= -p "$pid" | tr -d ' ')" 2>/dev/null | xargs basename 2>/dev/null))"
+    done
+  }
+
+  ensure_idle() {
+    (( FORCE )) && return 0
+    local out tries=0
+    # the Claude app briefly runs git in a worktree after each turn, so give short-lived processes time to exit
+    while out="$(busy_processes "$1")"; [[ -n "$out" ]] && (( tries++ < 10 )); do
+      (( tries == 1 )) && print -u2 "wt: waiting for processes in ${1:t} to finish..."
+      sleep 0.5
+    done
+    [[ -z "$out" ]] && return 0
+    print -u2 "wt: processes are running inside $1:"
+    print -u2 -- "$out"
+    die "wait for them to finish or rerun with --force"
+  }
+
+  warn_if_inside() {
+    local here="${PWD:A}" root="${1:A}"
+    [[ "$here" == "$root" || "$here" == "$root"/* ]] &&
+      print -u2 "wt: note: your shell is inside ${1:t}; cd back into it after the switch"
+  }
+
+  claude_projects_dir() { print -r -- "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/projects/${1//[^a-zA-Z0-9]/-}" }
+
+  # A session process the Claude app restarts while hosted gets main as its real cwd and
+  # looks for its transcript under main's project dir, so expose the worktree's sessions there.
+  link_transcripts() {
+    local src="$(claude_projects_dir "$1")" dst="$(claude_projects_dir "$MAIN")" e
+    [[ -d "$src" ]] || return 0
+    mkdir -p "$dst"
+    for e in "$src"/*(N); do
+      [[ -L "$dst/${e:t}" ]] && continue
+      # a fragment left by a stale session would shadow the real transcript
+      [[ -e "$dst/${e:t}" ]] && mv "$dst/${e:t}" "$dst/${e:t}.wt-stale-$(date +%s)"
+      ln -s "$e" "$dst/${e:t}"
+    done
+  }
+
+  unlink_transcripts() {
+    local src="$(claude_projects_dir "$1")" dst="$(claude_projects_dir "$MAIN")" e
+    for e in "$dst"/*(N@); do
+      [[ "$(readlink "$e")" == "$src"/* ]] && rm "$e"
+    done
+    return 0
+  }
+
+  # Claude processes restarted while hosted: their shell still runs in main after the return.
+  stale_sessions() {
+    local src="$(claude_projects_dir "$1")" pid cwd args sid
+    lsof -a -d cwd -Fpn 2>/dev/null | awk '/^p/ { pid = substr($0, 2) } /^n/ { print pid "\t" substr($0, 2) }' |
+    while IFS=$'\t' read -r pid cwd; do
+      [[ "$cwd" == "${MAIN:A}" ]] || continue
+      args="$(ps -ww -o args= -p "$pid" 2>/dev/null)"
+      [[ "$args" == *claude* && "$args" =~ '--resume[= ]([0-9a-f-]+)' ]] || continue
+      sid="${match[1]}"
+      [[ -e "$src/$sid.jsonl" ]] && print -r -- "  pid $pid, session $sid"
+    done
+  }
+
+  lockfile_hashes() {
+    local f
+    git_main ls-files -co --exclude-standard -- pnpm-lock.yaml '*poetry.lock' | while read -r f; do
+      print -r -- "$f $(shasum < "$MAIN/$f" | cut -c1-12)"
+    done
+  }
+
+  any_process_in() {
+    local root="${1:A}"
+    lsof -a -d cwd -Fn 2>/dev/null | grep -qE "^n${(b)root}(/|\$)"
+  }
+
+  # --- journalled, idempotent steps -------------------------------------------
+
+  step_park_main() {
+    local branch="$1"
+    [[ "$(current_branch "$MAIN")" == "$branch" ]] && park_changes "$MAIN"
+    return 0
+  }
+
+  step_leave() {
+    local branch="$1" orig="$2" park="$3"
+    if [[ "$(current_branch "$MAIN")" == "$branch" ]]; then
+      park_changes "$MAIN"
+      git_main checkout -q --detach || die "could not detach main checkout"
+    fi
+    [[ -L "$orig" ]] && { rm "$orig" || die "could not remove symlink $orig" }
+    unlink_transcripts "$orig"
+    if [[ -d "$park" ]]; then
+      git_main worktree unlock "$park" 2>/dev/null
+      git_main worktree move "$park" "$orig" || die "could not move $park back to $orig"
+    fi
+    [[ "$(current_branch "$orig")" == "$branch" ]] ||
+      git -C "$orig" checkout -q "$branch" || die "could not check out $branch in $orig"
+    unpark_changes "$orig"
+  }
+
+  step_enter() {
+    local branch="$1" orig="$2" park="$3"
+    if [[ -d "$orig" && ! -L "$orig" && "$(current_branch "$orig")" == "$branch" ]]; then
+      park_changes "$orig"
+      git -C "$orig" checkout -q --detach || die "could not detach $orig"
+    fi
+    [[ "$(current_branch "$MAIN")" == "$branch" ]] ||
+      git_main checkout -q "$branch" || die "could not check out $branch in main"
+    unpark_changes "$MAIN"
+    if [[ -d "$orig" && ! -L "$orig" ]]; then
+      mkdir -p "${park:h}"
+      git_main worktree move "$orig" "$park" || die "could not park $orig"
+    fi
+    git_main worktree list --porcelain | grep -qxF "worktree $park" &&
+      ! parked | grep -qF "$US$park" &&
+      git_main worktree lock --reason "$LOCK_TAG $branch $orig" "$park" ||
+      die "could not lock $park"
+    link_transcripts "$orig"
+    [[ -e "$orig" || -L "$orig" ]] || ln -s "$MAIN" "$orig" || die "could not link $orig"
+  }
+
+  step_checkout() {
+    local target="$1"
+    if git_main show-ref --verify --quiet "refs/heads/$target" ||
+       git_main show-ref --verify --quiet "refs/remotes/origin/$target"; then
+      [[ "$(current_branch "$MAIN")" == "$target" ]] ||
+        git_main checkout -q "$target" || die "could not check out $target"
+    else
+      git_main checkout -q --detach "$target" || die "could not check out $target"
+    fi
+    unpark_changes "$MAIN"
+  }
+
+  run_journal() {
+    local i=0 done_count=0 line
+    local -a steps
+    steps=("${(@f)$(grep -v '^done$' "$JOURNAL")}")
+    done_count=$(grep -c '^done$' "$JOURNAL")
+    for line in $steps; do
+      (( ++i <= done_count )) && continue
+      local -a args=("${(@ps:\t:)line}")
+      "step_${args[1]}" "${(@)args[2,-1]}"
+      print done >> "$JOURNAL"
+    done
+    rm -f "$JOURNAL"
+  }
+
+  # --- commands ---------------------------------------------------------------
+
+  cmd_switch() {
+    local target="${1:-}"
+    [[ -f "$JOURNAL" ]] && die "a previous switch was interrupted; run 'wt repair' first"
+    [[ -n "$target" ]] || target="$(pick_target)" || exit 1
+    [[ -n "$target" ]] || exit 1
+
+    local cur="$(current_branch "$MAIN")"
+    [[ -n "$cur" ]] || cur="$(git_main rev-parse HEAD)"
+    if [[ "$target" == "-" ]]; then
+      target="$(cat "$STATE/prev" 2>/dev/null)" || die "no previous branch recorded"
+    fi
+    [[ "$target" == "$cur" ]] && { info "already on $target"; return 0 }
+
+    local tgt_wt="" found
+    if found="$(worktree_by_name "$target")" && [[ -n "$found" ]]; then
+      tgt_wt="${found%%	*}"; target="${found#*	}"
+      [[ "$target" == "$cur" ]] && { info "already on $target"; return 0 }
+    else
+      tgt_wt="$(worktree_for_branch "$target")"
+    fi
+    if [[ -z "$tgt_wt" ]] &&
+       ! git_main show-ref --verify --quiet "refs/heads/$target" &&
+       ! git_main show-ref --verify --quiet "refs/remotes/origin/$target" &&
+       ! git_main rev-parse --verify --quiet "$target^{commit}" >/dev/null; then
+      die "unknown branch or worktree: $target"
+    fi
+
+    if ! current_branch "$MAIN" >/dev/null && is_dirty "$MAIN"; then
+      die "main checkout has uncommitted changes on a detached HEAD"
+    fi
+
+    local hosted="" h_branch h_orig h_park
+    hosted="$(parked)"
+    [[ "$(print -r -- "$hosted" | grep -c .)" -le 1 ]] || die "more than one worktree is parked; run 'wt repair'"
+    if [[ -n "$hosted" ]]; then
+      IFS=$US read -r h_branch h_orig h_park <<< "$hosted"
+      [[ "$h_branch" == "$cur" ]] || die "main left $h_branch behind outside wt; run 'wt repair'"
+      ensure_idle "$h_park"
+    fi
+    if [[ -n "$tgt_wt" ]]; then
+      ensure_idle "$tgt_wt"
+      warn_if_inside "$tgt_wt"
+    fi
+
+    local -a plan
+    if [[ -n "$hosted" ]]; then
+      plan+=("leave	$h_branch	$h_orig	$h_park")
+    else
+      plan+=("park_main	$cur")
+    fi
+    if [[ -n "$tgt_wt" ]]; then
+      plan+=("enter	$target	$tgt_wt	$STATE/parked/${tgt_wt:t}")
+    else
+      plan+=("checkout	$target")
+    fi
+
+    local before="$(lockfile_hashes)"
+    print -l -- $plan > "$JOURNAL"
+    run_journal
+    print -r -- "$cur" > "$STATE/prev"
+
+    info "main checkout now on $target${tgt_wt:+ (hosting ${tgt_wt:t})}"
+    if [[ -n "$hosted" ]]; then
+      local stale="$(stale_sessions "$h_orig")"
+      if [[ -n "$stale" ]]; then
+        print -u2 "wt: WARNING: these Claude sessions of ${h_orig:t} were restarted while it was hosted."
+        print -u2 "wt: their shell still runs in the main checkout, so git commands would hit $target:"
+        print -u2 -- "$stale"
+        print -u2 "wt: stop each one in the Claude app, then send it a message to restart it in ${h_orig:t}"
+      fi
+    fi
+    local drift="$(diff <(print -r -- "$before") <(lockfile_hashes) | awk '/^[<>]/ { print $2 }' | sort -u)"
+    print -r -- "$drift" > "$STATE/drift"
+    if [[ -n "$drift" ]]; then
+      info "lockfiles changed, reinstall may be needed:"
+      print -r -- "$drift" | sed 's/^/  /'
+    fi
+  }
+
+  cmd_home() { cmd_switch "$DEFAULT_BRANCH" }
+
+  cmd_status() {
+    local branch="$(current_branch "$MAIN")"
+    info "main:    $MAIN"
+    info "branch:  ${branch:-detached at $(git_main rev-parse --short HEAD)}"
+    local n="$(git_main status --porcelain | grep -c .)"
+    (( n )) && info "changes: $n uncommitted"
+    local b o p
+    parked | while IFS=$US read -r b o p; do
+      info "hosting: $b from ${o:t}"
+      [[ -L "$o" ]] || info "  ! $o is not a symlink to main; run 'wt repair'"
+      is_dirty "$p" && info "  ! parked copy $p has stray changes"
+    done
+    [[ -f "$JOURNAL" ]] && info "! an interrupted switch is pending; run 'wt repair'"
+    local teleports="$(git_main for-each-ref --format='%(refname:short)	%(subject)' refs/heads |
+      awk -F'\t' -v m="$TELEPORT_MSG" '$2 == m { print "  " $1 }')"
+    [[ -n "$teleports" ]] && { info "parked changes on:"; print -r -- "$teleports" }
+    if [[ -s "$STATE/drift" ]]; then
+      info "lockfiles changed at last switch:"
+      sed 's/^/  /' "$STATE/drift"
+    fi
+    return 0
+  }
+
+  cmd_list() {
+    local p b l o age n
+    {
+      local mb="$(current_branch "$MAIN")"
+      print -r -- "*	${mb:-(detached)}	main	$(git_main status --porcelain | grep -c .)	$(git_main log -1 --format=%cr)"
+      local tmp="$(mktemp -d)" i=0
+      worktrees | while IFS=$US read -r p b l; do
+        [[ "$l" == $LOCK_TAG\ * ]] && continue
+        (( ++i ))
+        if [[ ! -d "$p" ]]; then
+          print -r -- " 	${b:-(detached)}	${p:t}	-	missing" > "$tmp/$i"
+          continue
+        fi
+        {
+          n="$(git -C "$p" status --porcelain 2>/dev/null | grep -c .)"
+          age="$(git -C "$p" log -1 --format=%cr 2>/dev/null)"
+          print -r -- " 	${b:-(detached)}	${p:t}	$n	$age" > "$tmp/$i"
+        } &
+        (( i % 12 == 0 )) && wait
+      done
+      wait
+      for f in "$tmp"/*(Nn); do cat "$f"; done
+      rm -rf "$tmp"
+      parked | while IFS=$US read -r b o p; do
+        print -r -- "*	$b	${o:t} (hosted)	-	$(git -C "$MAIN" log -1 --format=%cr "$b")"
+      done
+    } | column -t -s $'\t'
+  }
+
+  pick_target() {
+    local -a cands
+    cands=("$DEFAULT_BRANCH")
+    local p b l
+    worktrees | while IFS=$US read -r p b l; do
+      [[ -n "$b" && -d "$p" && "$l" != $LOCK_TAG\ * ]] && cands+=("$b")
+    done
+    cands+=(${(f)"$(git_main for-each-ref --sort=-committerdate --count=15 --format='%(refname:short)' refs/heads)"})
+    cands=(${(u)cands})
+    if (( $+commands[fzf] )); then
+      print -l -- $cands | fzf --prompt="wt switch> " --height=40% --reverse
+    else
+      local PS3="wt switch> " choice
+      select choice in $cands; do [[ -n "$choice" ]] && { print -r -- "$choice"; return 0 }; done
+      return 1
+    fi
+  }
+
+  cmd_repair() {
+    if [[ -f "$JOURNAL" ]]; then
+      info "resuming interrupted switch:"
+      grep -v '^done$' "$JOURNAL" | sed 's/^/  /'
+      run_journal
+      info "done"
+      return 0
+    fi
+    local hosted b o p
+    hosted="$(parked)"
+    [[ -z "$hosted" ]] && { info "nothing to repair"; return 0 }
+    local cur="$(current_branch "$MAIN")"
+    print -r -- "$hosted" | while IFS=$US read -r b o p; do
+      if [[ "$b" == "$cur" && -L "$o" ]]; then
+        info "$b hosted from ${o:t}: ok"
+        continue
+      fi
+      info "returning $b to ${o:t}"
+      print -r -- "leave	$b	$o	$p" > "$JOURNAL"
+      [[ "$b" == "$cur" ]] && print -r -- "checkout	$DEFAULT_BRANCH" >> "$JOURNAL"
+      run_journal
+    done
+  }
+
+  branch_is_merged() {
+    local branch="$1" base="$2" mb tmp
+    mb="$(git_main merge-base "$base" "$branch")" || return 1
+    [[ "$(git_main rev-parse "$branch")" == "$mb" ]] && return 0
+    tmp="$(git_main commit-tree "$branch^{tree}" -p "$mb" -m squash-check)" || return 1
+    [[ "$(git_main cherry "$base" "$tmp")" == -* ]]
+  }
+
+  cmd_prune() {
+    local base="refs/remotes/origin/$DEFAULT_BRANCH"
+    git_main show-ref --verify --quiet "$base" || base="refs/heads/$DEFAULT_BRANCH"
+    local p b l
+    local -a doomed
+    worktrees | while IFS=$US read -r p b l; do
+      [[ -d "$p" && -n "$b" && -z "$l" ]] || continue
+      is_dirty "$p" && continue
+      any_process_in "$p" && continue
+      branch_is_merged "$b" "$base" && doomed+=("$p")
+    done
+    local stale="$(git_main worktree prune --dry-run -v 2>&1)"
+    if (( ! FORCE )); then
+      [[ -n "$stale" ]] && { info "would prune missing worktrees:"; print -r -- "$stale" | sed 's/^/  /' }
+      (( ${#doomed} )) || { info "no merged, clean, idle worktrees"; return 0 }
+      info "would remove (rerun with --force):"
+      print -l -- ${doomed/#/  }
+      return 0
+    fi
+    git_main worktree prune
+    for p in $doomed; do
+      git_main worktree remove "$p" && info "removed ${p:t}"
+    done
+  }
+
+  usage() {
+    print -r -- "usage: wt [switch] [<branch>|<worktree>|-]  switch the main checkout (picker if omitted)"
+    print -r -- "       wt home                            switch to $DEFAULT_BRANCH"
+    print -r -- "       wt status                          show what main is hosting"
+    print -r -- "       wt list                            list worktrees"
+    print -r -- "       wt repair                          finish or undo an interrupted switch"
+    print -r -- "       wt prune [--force]                 remove merged, clean, idle worktrees"
+    print -r -- "options: --force  skip the busy-process check (switch) / actually remove (prune)"
+  }
+
+  FORCE=0
+  local -a args
+  for a in "$@"; do
+    case "$a" in
+      -f|--force) FORCE=1 ;;
+      -h|--help) init_repo 2>/dev/null; usage; exit 0 ;;
+      *) args+=("$a") ;;
+    esac
+  done
+  set -- "${args[@]}"
+
+  init_repo
+  case "${1:-}" in
+    switch|sw) shift; cmd_switch "${1:-}" ;;
+    home) cmd_home ;;
+    status|st) cmd_status ;;
+    list|ls) cmd_list ;;
+    repair) cmd_repair ;;
+    prune) cmd_prune ;;
+    help) usage ;;
+    "") cmd_switch "" ;;
+    *) cmd_switch "$1" ;;
+  esac
+)

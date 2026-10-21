@@ -1,0 +1,40 @@
+#compdef wt
+
+local -a commands worktrees branches
+commands=(
+  'switch:switch the main checkout to a branch or worktree'
+  'home:switch to the default branch'
+  'status:show what the main checkout is hosting'
+  'list:list worktrees'
+  'repair:finish or undo an interrupted switch'
+  'prune:remove merged, clean, idle worktrees'
+)
+
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  worktrees=(${${(f)"$(git worktree list --porcelain | awk 'NR > 1 && /^worktree / { print substr($0, 10) }')"}:t})
+  branches=(${(f)"$(git for-each-ref --format='%(refname:short)' refs/heads)"})
+fi
+
+# branches only once something is typed, otherwise the list runs into the hundreds
+_wt_targets() {
+  local ret=1
+  _describe -t worktrees worktree worktrees && ret=0
+  [[ -n $PREFIX ]] && _describe -t branches branch branches && ret=0
+  return ret
+}
+
+local state
+_arguments -C \
+  '(-f --force)'{-f,--force}'[skip the busy check (switch) / actually remove (prune)]' \
+  '1: :->first' \
+  '2: :->second' && return
+
+case $state in
+  first)
+    _describe -t commands command commands
+    _wt_targets
+    ;;
+  second)
+    [[ $words[2] == (switch|sw) ]] && _wt_targets
+    ;;
+esac
