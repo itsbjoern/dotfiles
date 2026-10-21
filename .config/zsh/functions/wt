@@ -5,6 +5,12 @@ wt() (
   emulate -L zsh
   setopt pipe_fail no_unset extended_glob
 
+  # functions from the calling shell (e.g. a diff() helper) must not shadow the real commands
+  local f
+  for f in ${(k)functions}; do
+    (( $+commands[$f] )) && unfunction $f
+  done
+
   TELEPORT_MSG="WIP: teleport"
   LOCK_TAG="wt-parked"
   US=$'\x1f'
@@ -324,7 +330,11 @@ wt() (
       fi
     fi
     local drift="$(diff <(print -r -- "$before") <(lockfile_hashes) | awk '/^[<>]/ { print $2 }' | sort -u)"
-    print -r -- "$drift" > "$STATE/drift"
+    if [[ -n "$drift" ]]; then
+      print -r -- "$drift" > "$STATE/drift"
+    else
+      rm -f "$STATE/drift"
+    fi
     if [[ -n "$drift" ]]; then
       info "lockfiles changed, reinstall may be needed:"
       print -r -- "$drift" | sed 's/^/  /'
@@ -349,7 +359,7 @@ wt() (
     local teleports="$(git_main for-each-ref --format='%(refname:short)	%(subject)' refs/heads |
       awk -F'\t' -v m="$TELEPORT_MSG" '$2 == m { print "  " $1 }')"
     [[ -n "$teleports" ]] && { info "parked changes on:"; print -r -- "$teleports" }
-    if [[ -s "$STATE/drift" ]]; then
+    if grep -q . "$STATE/drift" 2>/dev/null; then
       info "lockfiles changed at last switch:"
       sed 's/^/  /' "$STATE/drift"
     fi
