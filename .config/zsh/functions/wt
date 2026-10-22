@@ -50,18 +50,24 @@ wt() (
       END          { flush() }'
   }
 
+  # Never stop reading a pipe early (return in a piped loop, grep -q): with ~90 worktrees
+  # the writer gets SIGPIPE and pipe_fail turns that into a failure.
   worktree_for_branch() {
-    local p b l
-    worktrees | while IFS=$US read -r p b l; do
-      [[ "$b" == "$1" ]] && { print -r -- "$p"; return }
+    local p b l line
+    for line in ${(f)"$(worktrees)"}; do
+      IFS=$US read -r p b l <<< "$line"
+      [[ "$b" == "$1" ]] && { print -r -- "$p"; return 0 }
     done
+    return 0
   }
 
   worktree_by_name() {
-    local p b l
-    worktrees | while IFS=$US read -r p b l; do
-      [[ "${p:t}" == "$1" && -n "$b" && "$l" != $LOCK_TAG\ * ]] && { print -r -- "$p	$b"; return }
+    local p b l line
+    for line in ${(f)"$(worktrees)"}; do
+      IFS=$US read -r p b l <<< "$line"
+      [[ "${p:t}" == "$1" && -n "$b" && "$l" != $LOCK_TAG\ * ]] && { print -r -- "$p	$b"; return 0 }
     done
+    return 0
   }
 
   # Prints "branch<TAB>orig<TAB>park" for each parked worktree.
@@ -181,7 +187,7 @@ wt() (
 
   any_process_in() {
     local root="${1:A}"
-    lsof -a -d cwd -Fn 2>/dev/null | grep -qE "^n${(b)root}(/|\$)"
+    [[ -n "$(lsof -a -d cwd -Fn 2>/dev/null | grep -E "^n${(b)root}(/|\$)")" ]]
   }
 
   # --- journalled, idempotent steps -------------------------------------------
@@ -222,10 +228,10 @@ wt() (
       mkdir -p "${park:h}"
       git_main worktree move "$orig" "$park" || die "could not park $orig"
     fi
-    git_main worktree list --porcelain | grep -qxF "worktree $park" &&
-      ! parked | grep -qF "$US$park" &&
-      git_main worktree lock --reason "$LOCK_TAG $branch $orig" "$park" ||
-      die "could not lock $park"
+    if [[ -n "$(git_main worktree list --porcelain | grep -xF "worktree $park")" &&
+          -z "$(parked | grep -F "$US$park")" ]]; then
+      git_main worktree lock --reason "$LOCK_TAG $branch $orig" "$park" || die "could not lock $park"
+    fi
     link_transcripts "$orig"
     [[ -e "$orig" || -L "$orig" ]] || ln -s "$MAIN" "$orig" || die "could not link $orig"
   }
